@@ -4,8 +4,8 @@ import 'package:westigov2/models/facility.dart';
 import 'package:westigov2/providers/search_provider.dart';
 import 'package:westigov2/screens/map/facility_detail_screen.dart';
 import 'package:westigov2/utils/constants.dart';
-import 'package:westigov2/models/facility.dart'; // Import
-import 'package:westigov2/screens/map/facility_detail_screen.dart'; // Import
+import 'package:westigov2/models/space.dart'; // Import
+import 'package:westigov2/screens/map/space_detail_screen.dart'; // Import
 
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
@@ -130,7 +130,20 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                                 ),
                               );
                             } else {
-                              // TODO: Handle Space tap
+                              final space = result.originalObject as Space;
+                              // We try to infer parent name from description or just leave generic
+                              // In a real app, we might fetch the parent facility name here
+
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => SpaceDetailScreen(
+                                    space: space,
+                                    parentFacilityName:
+                                        'See Facility Details', // Placeholder logic
+                                  ),
+                                ),
+                              );
                             }
                           },
                         );

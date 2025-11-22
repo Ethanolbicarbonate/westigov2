@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:westigov2/models/facility.dart';
 import 'package:westigov2/providers/facility_provider.dart';
 import 'package:westigov2/utils/constants.dart';
+import 'package:westigov2/screens/map/space_detail_screen.dart'; // Import
 
 class FacilityDetailScreen extends ConsumerWidget {
   final Facility facility;
@@ -83,7 +84,8 @@ class FacilityDetailScreen extends ConsumerWidget {
               if (spaces.isEmpty) {
                 return const SliverToBoxAdapter(
                   child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: AppSizes.paddingL),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: AppSizes.paddingL),
                     child: Text('No spaces listed for this facility.'),
                   ),
                 );
@@ -93,15 +95,24 @@ class FacilityDetailScreen extends ConsumerWidget {
                   (context, index) {
                     final space = spaces[index];
                     return ListTile(
-                      leading: const Icon(Icons.meeting_room, color: Colors.grey),
+                      leading:
+                          const Icon(Icons.meeting_room, color: Colors.grey),
                       title: Text(space.name),
-                      subtitle: space.floorLevel != null 
-                          ? Text(space.floorLevel!) 
+                      subtitle: space.floorLevel != null
+                          ? Text(space.floorLevel!)
                           : null,
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () {
-                        // TODO: Go to Space Detail
-                        print('Space tapped: ${space.name}');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SpaceDetailScreen(
+                              space: space,
+                              parentFacilityName:
+                                  facility.name, // We know the parent here!
+                            ),
+                          ),
+                        );
                       },
                     );
                   },
@@ -115,11 +126,12 @@ class FacilityDetailScreen extends ConsumerWidget {
             error: (err, stack) => SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.all(AppSizes.paddingL),
-                child: Text('Error loading spaces: $err', style: const TextStyle(color: Colors.red)),
+                child: Text('Error loading spaces: $err',
+                    style: const TextStyle(color: Colors.red)),
               ),
             ),
           ),
-          
+
           // Bottom Padding
           const SliverToBoxAdapter(child: SizedBox(height: 40)),
         ],
