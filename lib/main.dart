@@ -38,7 +38,7 @@ class WestigoApp extends StatelessWidget {
           centerTitle: true,
         ),
       ),
-      home: const MapScreen(),
+      home: const HomeScreen(),
     );
   }
 }
