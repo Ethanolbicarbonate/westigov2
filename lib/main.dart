@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:westigov2/config/supabase_config.dart';
+import 'package:westigov2/screens/events/events_screen.dart';
 import 'package:westigov2/screens/home_screen.dart';
 import 'package:westigov2/screens/auth/login_screen.dart';
 import 'package:westigov2/screens/map/map_screen.dart';
@@ -38,7 +39,7 @@ class WestigoApp extends StatelessWidget {
           centerTitle: true,
         ),
       ),
-      home: const HomeScreen(),
+      home: const EventsScreen(),
     );
   }
 }

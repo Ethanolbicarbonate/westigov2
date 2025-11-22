@@ -6,6 +6,7 @@ import 'package:westigov2/widgets/event_card.dart';
 import 'package:westigov2/screens/events/event_detail_screen.dart';
 import 'package:westigov2/widgets/event_filter_sheet.dart';
 import 'package:westigov2/providers/event_filter_provider.dart';
+import 'package:westigov2/widgets/event_card_skeleton.dart';
 
 class EventsScreen extends ConsumerStatefulWidget {
   const EventsScreen({super.key});
@@ -36,19 +37,34 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
               alignment: Alignment.center,
               children: [
                 const Icon(Icons.filter_list),
-                // Optional Badge if filters active
                 Consumer(builder: (context, ref, _) {
-                  final hasFilters = ref.watch(eventFilterProvider).hasFilters;
-                  if (!hasFilters) return const SizedBox.shrink();
+                  final state = ref.watch(eventFilterProvider);
+                  final count = state.selectedYears.length +
+                      state.selectedColleges.length;
+
+                  if (count == 0) return const SizedBox.shrink();
+
                   return Positioned(
                     top: 0,
                     right: 0,
                     child: Container(
-                      width: 8,
-                      height: 8,
+                      padding: const EdgeInsets.all(4),
                       decoration: const BoxDecoration(
                         color: Colors.red,
                         shape: BoxShape.circle,
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 16,
+                        minHeight: 16,
+                      ),
+                      child: Text(
+                        '$count',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
                     ),
                   );
@@ -125,8 +141,11 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
             ),
           );
         },
-        loading: () => const Center(
-          child: CircularProgressIndicator(),
+        loading: () => ListView.separated(
+          padding: const EdgeInsets.all(AppSizes.paddingM),
+          itemCount: 3, // Show 3 skeletons
+          separatorBuilder: (_, __) => const SizedBox(height: 16),
+          itemBuilder: (_, __) => const EventCardSkeleton(),
         ),
         error: (err, stack) => Center(
           child: Column(

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:westigov2/models/event.dart';
 import 'package:westigov2/utils/constants.dart';
-import 'package:westigov2/utils/helpers.dart'; // Ensure formatDateTime is here
+import 'package:westigov2/utils/helpers.dart';
+import 'package:westigov2/widgets/favorite_button.dart';
 
 class EventCard extends StatelessWidget {
   final Event event;
@@ -32,21 +33,42 @@ class EventCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // 1. Image
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(AppSizes.radiusM)),
-              child: SizedBox(
-                height: 140,
-                child: event.imageUrl != null
-                    ? Image.network(
-                        event.imageUrl!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => _buildPlaceholder(),
-                      )
-                    : _buildPlaceholder(),
-              ),
-            ),
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(AppSizes.radiusM),
+                  ),
+                  child: SizedBox(
+                    height: 140,
+                    width: double.infinity,
+                    child: event.imageUrl != null
+                        ? Image.network(
+                            event.imageUrl!,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => _buildPlaceholder(),
+                          )
+                        : _buildPlaceholder(),
+                  ),
+                ),
 
+                /// Favorite Button overlay
+                Positioned(
+                  top: 4,
+                  right: 4,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.3),
+                      shape: BoxShape.circle,
+                    ),
+                    child: FavoriteButton(
+                      type: 'event',
+                      id: event.id,
+                    ),
+                  ),
+                ),
+              ],
+            ),
             // 2. Details
             Padding(
               padding: const EdgeInsets.all(AppSizes.paddingM),
@@ -63,7 +85,7 @@ class EventCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  
+
                   // Title
                   Text(
                     event.name,
@@ -75,7 +97,7 @@ class EventCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
-                  
+
                   // Description
                   if (event.description != null)
                     Text(
@@ -86,14 +108,15 @@ class EventCard extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                  
+
                   const SizedBox(height: 12),
 
                   // 3. Audience Tags
                   Wrap(
                     spacing: 8,
                     runSpacing: 4,
-                    children: event.scopes.map((scope) => _buildTag(scope)).toList(),
+                    children:
+                        event.scopes.map((scope) => _buildTag(scope)).toList(),
                   ),
                 ],
               ),
