@@ -4,7 +4,6 @@ import 'package:westigov2/models/facility.dart';
 class FacilityService {
   final SupabaseClient _supabase;
 
-  // Dependency injection via constructor allows for easier testing
   FacilityService(this._supabase);
 
   /// Fetches all facilities from Supabase
@@ -16,23 +15,27 @@ class FacilityService {
           .order('name', ascending: true);
 
       // Map the list of JSON objects to a list of Facility objects
-      return (response as List)
+      final facilities = (response as List)
           .map((json) => Facility.fromJson(json))
           .toList();
+      
+      return facilities;
     } catch (e) {
-      // In a real app, we might log this error to a monitoring service
+      // Log error
       print('Error fetching facilities: $e');
+      // Return empty list or rethrow depending on how you want to handle it
+      // For now, rethrow so the UI knows something went wrong
       rethrow;
     }
   }
 
-  /// Search facilities by name (Simple ILIKE search for now)
+  /// Search facilities by name
   Future<List<Facility>> searchFacilities(String query) async {
     try {
       final response = await _supabase
           .from('facilities')
           .select()
-          .ilike('name', '%$query%'); // Case-insensitive partial match
+          .ilike('name', '%$query%'); 
 
       return (response as List)
           .map((json) => Facility.fromJson(json))
