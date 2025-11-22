@@ -56,4 +56,21 @@ class UserService {
       rethrow;
     }
   }
+
+  /// Remove profile picture
+  Future<void> deleteProfilePicture(String userId) async {
+    // Note: We ideally should delete the file from Storage bucket too to save space,
+    // but finding the exact filename from the URL requires parsing.
+    // For MVP, we can just nullify the URL in the database.
+    
+    // Step 1: Update DB
+    await _supabase.from('users').update({
+      'profile_picture_url': null,
+    }).eq('id', userId);
+    
+    final list = await _supabase.storage.from('profiles').list(path: userId);
+    if (list.isNotEmpty) {
+      await _supabase.storage.from('profiles').remove(list.map((f) => '$userId/${f.name}').toList());
+    }
+  }
 }

@@ -21,7 +21,8 @@ class ProfileScreen extends ConsumerStatefulWidget {
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _isUploading = false;
 
-  Future<void> _handleProfilePictureEdit(String userId, String? currentUrl) async {
+  Future<void> _handleProfilePictureEdit(
+      String userId, String? currentUrl) async {
     // Show Bottom Sheet Options
     showModalBottomSheet(
       context: context,
@@ -48,16 +49,58 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             if (currentUrl != null)
               ListTile(
                 leading: const Icon(Icons.delete, color: Colors.red),
-                title: const Text('Remove Photo', style: TextStyle(color: Colors.red)),
+                title: const Text('Remove Photo',
+                    style: TextStyle(color: Colors.red)),
                 onTap: () {
                   Navigator.pop(ctx);
-                  // TODO: Implement delete functionality here
+                  _confirmDeletePhoto(userId); // Call confirmation
                 },
               ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _confirmDeletePhoto(String userId) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Remove Photo?'),
+        content:
+            const Text('Are you sure you want to remove your profile picture?'),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Remove', style: TextStyle(color: Colors.red))),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      setState(() => _isUploading = true);
+      try {
+        final service = ref.read(userServiceProvider);
+        await service.deleteProfilePicture(userId);
+
+        await ref
+            .read(userProfileProvider.notifier)
+            .refresh(); // Full refresh is safer here
+
+        if (mounted) {
+          AppHelpers.showSuccessSnackbar(context, 'Profile picture removed');
+        }
+      } catch (e) {
+        if (mounted) {
+          AppHelpers.showErrorSnackbar(context, 'Failed to remove photo: $e');
+        }
+      } finally {
+        if (mounted) setState(() => _isUploading = false);
+      }
+    }
   }
 
   Future<void> _pickAndUpload(String userId, ImageSource source) async {
@@ -76,7 +119,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
       // Upload via service
       final service = ref.read(userServiceProvider);
-      final url = await service.uploadProfilePicture(userId, File(pickedFile.path));
+      final url =
+          await service.uploadProfilePicture(userId, File(pickedFile.path));
 
       if (url != null) {
         // Update User Record in DB
@@ -134,7 +178,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 // Profile Picture with Upload Logic
                 Center(
                   child: GestureDetector(
-                    onTap: () => _handleProfilePictureEdit(user.id, user.profilePictureUrl),
+                    onTap: () => _handleProfilePictureEdit(
+                        user.id, user.profilePictureUrl),
                     child: Stack(
                       children: [
                         Container(
@@ -147,9 +192,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             boxShadow: const [
                               BoxShadow(color: Colors.black12, blurRadius: 8)
                             ],
-                            image: user.profilePictureUrl != null && !_isUploading
+                            image: user.profilePictureUrl != null &&
+                                    !_isUploading
                                 ? DecorationImage(
-                                    image: NetworkImage(user.profilePictureUrl!),
+                                    image:
+                                        NetworkImage(user.profilePictureUrl!),
                                     fit: BoxFit.cover,
                                   )
                                 : null,
@@ -157,7 +204,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           child: _isUploading
                               ? const Padding(
                                   padding: EdgeInsets.all(24.0),
-                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                  child:
+                                      CircularProgressIndicator(strokeWidth: 2),
                                 )
                               : (user.profilePictureUrl == null
                                   ? Center(
@@ -191,11 +239,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                
+
                 // User Details
                 Text(
                   '${user.firstName} ${user.lastName}',
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 22, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -207,9 +256,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   user.email,
                   style: const TextStyle(color: Colors.grey, fontSize: 12),
                 ),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Edit Profile Button
                 SizedBox(
                   width: double.infinity,
@@ -232,9 +281,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     child: const Text('Edit Profile'),
                   ),
                 ),
-                
+
                 const SizedBox(height: 32),
-                
+
                 // Account Settings
                 _buildSectionHeader('Account Settings'),
                 const SizedBox(height: 8),
@@ -245,14 +294,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                   child: Column(
                     children: [
-                      _buildSettingsItem(Icons.email_outlined, 'Change Email', () {
+                      _buildSettingsItem(Icons.email_outlined, 'Change Email',
+                          () {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
                                 builder: (_) => const ChangeEmailScreen()));
                       }),
                       const Divider(height: 1),
-                      _buildSettingsItem(Icons.lock_outline, 'Change Password', () {
+                      _buildSettingsItem(Icons.lock_outline, 'Change Password',
+                          () {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -261,9 +312,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ],
                   ),
                 ),
-                
+
                 const SizedBox(height: 32),
-                
+
                 // Logout Button
                 SizedBox(
                   width: double.infinity,
@@ -273,7 +324,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         context: context,
                         builder: (ctx) => AlertDialog(
                           title: const Text('Log Out'),
-                          content: const Text('Are you sure you want to log out?'),
+                          content:
+                              const Text('Are you sure you want to log out?'),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(ctx),
@@ -304,7 +356,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                     child: const Text(
                       'Log Out',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),

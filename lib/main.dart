@@ -6,6 +6,7 @@ import 'package:westigov2/screens/home_screen.dart';
 import 'package:westigov2/screens/auth/login_screen.dart';
 import 'package:westigov2/screens/map/map_screen.dart';
 import 'package:westigov2/utils/constants.dart';
+import 'package:westigov2/screens/auth_gate.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,7 +40,7 @@ class WestigoApp extends StatelessWidget {
           centerTitle: true,
         ),
       ),
-      home: const LoginScreen(),
+      home: const AuthGate(),
     );
   }
 }
