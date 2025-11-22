@@ -1,17 +1,109 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:westigov2/providers/auth_provider.dart';
 import 'package:westigov2/providers/user_provider.dart';
 import 'package:westigov2/screens/auth/login_screen.dart';
-import 'package:westigov2/utils/constants.dart';
-import 'package:westigov2/screens/profile/edit_profile_screen.dart';
 import 'package:westigov2/screens/profile/change_email_screen.dart';
+import 'package:westigov2/screens/profile/change_password_screen.dart';
+import 'package:westigov2/screens/profile/edit_profile_screen.dart';
+import 'package:westigov2/utils/constants.dart';
+import 'package:westigov2/utils/helpers.dart';
 
-class ProfileScreen extends ConsumerWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  bool _isUploading = false;
+
+  Future<void> _handleProfilePictureEdit(String userId, String? currentUrl) async {
+    // Show Bottom Sheet Options
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Choose from Gallery'),
+              onTap: () {
+                Navigator.pop(ctx);
+                _pickAndUpload(userId, ImageSource.gallery);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Take Photo'),
+              onTap: () {
+                Navigator.pop(ctx);
+                _pickAndUpload(userId, ImageSource.camera);
+              },
+            ),
+            if (currentUrl != null)
+              ListTile(
+                leading: const Icon(Icons.delete, color: Colors.red),
+                title: const Text('Remove Photo', style: TextStyle(color: Colors.red)),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  // TODO: Implement delete functionality here
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickAndUpload(String userId, ImageSource source) async {
+    try {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(
+        source: source,
+        maxWidth: 512, // Resize for performance
+        maxHeight: 512,
+        imageQuality: 70, // Compress
+      );
+
+      if (pickedFile == null) return;
+
+      setState(() => _isUploading = true);
+
+      // Upload via service
+      final service = ref.read(userServiceProvider);
+      final url = await service.uploadProfilePicture(userId, File(pickedFile.path));
+
+      if (url != null) {
+        // Update User Record in DB
+        // We need to get current profile first to update just the photo
+        final currentProfile = ref.read(userProfileProvider).value!;
+        final updatedProfile = currentProfile.copyWith(profilePictureUrl: url);
+
+        await service.updateUserProfile(updatedProfile);
+
+        // Refresh Local State
+        ref.read(userProfileProvider.notifier).updateLocal(updatedProfile);
+
+        if (mounted) {
+          AppHelpers.showSuccessSnackbar(context, 'Profile picture updated');
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        AppHelpers.showErrorSnackbar(context, 'Failed to upload image: $e');
+      }
+    } finally {
+      if (mounted) setState(() => _isUploading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final userAsync = ref.watch(userProfileProvider);
 
     return Scaffold(
@@ -31,66 +123,79 @@ class ProfileScreen extends ConsumerWidget {
             return const Center(child: Text('User not found'));
           }
 
-          final initials = '${user.firstName[0]}${user.lastName[0]}';
+          final initials = user.firstName.isNotEmpty && user.lastName.isNotEmpty
+              ? '${user.firstName[0]}${user.lastName[0]}'
+              : '??';
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(AppSizes.paddingL),
             child: Column(
               children: [
+                // Profile Picture with Upload Logic
                 Center(
-                  child: Stack(
-                    children: [
-                      Container(
-                        width: 100,
-                        height: 100,
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.1),
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 4),
-                          boxShadow: const [
-                            BoxShadow(color: Colors.black12, blurRadius: 8),
-                          ],
-                          image: user.profilePictureUrl != null
-                              ? DecorationImage(
-                                  image: NetworkImage(user.profilePictureUrl!),
-                                  fit: BoxFit.cover,
-                                )
-                              : null,
-                        ),
-                        child: user.profilePictureUrl == null
-                            ? Center(
-                                child: Text(
-                                  initials,
-                                  style: const TextStyle(
-                                    fontSize: 32,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.primary,
-                                  ),
-                                ),
-                              )
-                            : null,
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: const BoxDecoration(
-                            color: AppColors.primary,
+                  child: GestureDetector(
+                    onTap: () => _handleProfilePictureEdit(user.id, user.profilePictureUrl),
+                    child: Stack(
+                      children: [
+                        Container(
+                          width: 100,
+                          height: 100,
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withOpacity(0.1),
                             shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 4),
+                            boxShadow: const [
+                              BoxShadow(color: Colors.black12, blurRadius: 8)
+                            ],
+                            image: user.profilePictureUrl != null && !_isUploading
+                                ? DecorationImage(
+                                    image: NetworkImage(user.profilePictureUrl!),
+                                    fit: BoxFit.cover,
+                                  )
+                                : null,
                           ),
-                          child: const Icon(Icons.edit,
-                              size: 16, color: Colors.white),
+                          child: _isUploading
+                              ? const Padding(
+                                  padding: EdgeInsets.all(24.0),
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                )
+                              : (user.profilePictureUrl == null
+                                  ? Center(
+                                      child: Text(
+                                        initials,
+                                        style: const TextStyle(
+                                          fontSize: 32,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.primary,
+                                        ),
+                                      ),
+                                    )
+                                  : null),
                         ),
-                      ),
-                    ],
+                        // Camera Icon Overlay
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: const BoxDecoration(
+                              color: AppColors.primary,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.camera_alt,
+                                size: 16, color: Colors.white),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
+                
+                // User Details
                 Text(
                   '${user.firstName} ${user.lastName}',
-                  style: const TextStyle(
-                      fontSize: 22, fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -102,7 +207,10 @@ class ProfileScreen extends ConsumerWidget {
                   user.email,
                   style: const TextStyle(color: Colors.grey, fontSize: 12),
                 ),
+                
                 const SizedBox(height: 24),
+                
+                // Edit Profile Button
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton(
@@ -124,7 +232,10 @@ class ProfileScreen extends ConsumerWidget {
                     child: const Text('Edit Profile'),
                   ),
                 ),
+                
                 const SizedBox(height: 32),
+                
+                // Account Settings
                 _buildSectionHeader('Account Settings'),
                 const SizedBox(height: 8),
                 Container(
@@ -134,23 +245,26 @@ class ProfileScreen extends ConsumerWidget {
                   ),
                   child: Column(
                     children: [
-                      _buildSettingsItem(Icons.email_outlined, 'Change Email',
-                          () {
+                      _buildSettingsItem(Icons.email_outlined, 'Change Email', () {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
                                 builder: (_) => const ChangeEmailScreen()));
                       }),
                       const Divider(height: 1),
-                      _buildSettingsItem(
-                        Icons.lock_outline,
-                        'Change Password',
-                        () {},
-                      ),
+                      _buildSettingsItem(Icons.lock_outline, 'Change Password', () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => const ChangePasswordScreen()));
+                      }),
                     ],
                   ),
                 ),
+                
                 const SizedBox(height: 32),
+                
+                // Logout Button
                 SizedBox(
                   width: double.infinity,
                   child: TextButton(
@@ -159,8 +273,7 @@ class ProfileScreen extends ConsumerWidget {
                         context: context,
                         builder: (ctx) => AlertDialog(
                           title: const Text('Log Out'),
-                          content:
-                              const Text('Are you sure you want to log out?'),
+                          content: const Text('Are you sure you want to log out?'),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(ctx),
@@ -191,8 +304,7 @@ class ProfileScreen extends ConsumerWidget {
                     ),
                     child: const Text(
                       'Log Out',
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),

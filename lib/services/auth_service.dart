@@ -105,4 +105,16 @@ class AuthService {
           success: false, error: 'An unexpected error occurred');
     }
   }
+
+  /// Update User Password
+  Future<AppAuthResponse> updatePassword(String newPassword) async {
+    try {
+      await _supabase.auth.updateUser(UserAttributes(password: newPassword));
+      return AppAuthResponse(success: true);
+    } on AuthException catch (e) {
+      return AppAuthResponse(success: false, error: e.message);
+    } catch (e) {
+      return AppAuthResponse(success: false, error: 'An unexpected error occurred');
+    }
+  }
 }
