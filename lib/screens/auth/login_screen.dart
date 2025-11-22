@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:westigov2/providers/auth_provider.dart';
+import 'package:westigov2/screens/auth/signup_screen.dart';
 import 'package:westigov2/screens/home_screen.dart';
 import 'package:westigov2/utils/constants.dart';
 import 'package:westigov2/utils/helpers.dart';
@@ -184,7 +185,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       const Text("Don't have an account? ", style: TextStyle(color: AppColors.textLight)),
                       GestureDetector(
                         onTap: isLoading ? null : () {
-                          // TODO: Navigate to Signup
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (context) => const SignupScreen()),
+                          );
                         },
                         child: const Text(
                           'Sign Up',
