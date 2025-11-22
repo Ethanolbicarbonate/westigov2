@@ -6,6 +6,7 @@ import 'package:westigov2/widgets/favorite_space_card.dart';
 import 'package:westigov2/screens/map/space_detail_screen.dart';
 import 'package:westigov2/widgets/favorite_event_card.dart';
 import 'package:westigov2/screens/events/event_detail_screen.dart'; // To navigate
+import 'package:westigov2/providers/home_provider.dart'; // Import
 
 class FavoritesScreen extends ConsumerStatefulWidget {
   const FavoritesScreen({super.key});
@@ -132,34 +133,34 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen>
                           'Save rooms, labs, or buildings you visit often for quick access.',
                       buttonText: 'Explore Map',
                       onPressed: () {
-                        // Ideally switch tabs, but for now show snackbar
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('Go to the Map tab to explore!')),
-                        );
+                        ref.read(homeTabProvider.notifier).state = 0;
                       },
                     );
                   }
 
                   // List of favorite spaces
-                  return ListView.builder(
-                    padding: const EdgeInsets.all(AppSizes.paddingM),
-                    itemCount: spaces.length,
-                    itemBuilder: (context, index) {
-                      final space = spaces[index];
-                      return FavoriteSpaceCard(
-                        space: space,
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  SpaceDetailScreen(space: space),
-                            ),
-                          );
-                        },
-                      );
-                    },
+                  return RefreshIndicator(
+                    onRefresh: () =>
+                        ref.refresh(favoriteSpacesListProvider.future),
+                    child: ListView.builder(
+                      padding: const EdgeInsets.all(AppSizes.paddingM),
+                      itemCount: spaces.length,
+                      itemBuilder: (context, index) {
+                        final space = spaces[index];
+                        return FavoriteSpaceCard(
+                          space: space,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    SpaceDetailScreen(space: space),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
                   );
                 },
                 loading: () => const Center(child: CircularProgressIndicator()),
@@ -182,32 +183,33 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen>
                           'Don\'t miss out! Star events you are interested in attending.',
                       buttonText: 'Browse Events',
                       onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('Go to the Events tab to browse!')),
-                        );
+                        ref.read(homeTabProvider.notifier).state = 1;
                       },
                     );
                   }
 
-                  return ListView.builder(
-                    padding: const EdgeInsets.all(AppSizes.paddingM),
-                    itemCount: events.length,
-                    itemBuilder: (context, index) {
-                      final event = events[index];
-                      return FavoriteEventCard(
-                        event: event,
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  EventDetailScreen(event: event),
-                            ),
-                          );
-                        },
-                      );
-                    },
+                  return RefreshIndicator(
+                    onRefresh: () =>
+                        ref.refresh(favoriteEventsListProvider.future),
+                    child: ListView.builder(
+                      padding: const EdgeInsets.all(AppSizes.paddingM),
+                      itemCount: events.length,
+                      itemBuilder: (context, index) {
+                        final event = events[index];
+                        return FavoriteEventCard(
+                          event: event,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    EventDetailScreen(event: event),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
                   );
                 },
                 loading: () => const Center(child: CircularProgressIndicator()),
