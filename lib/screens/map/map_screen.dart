@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart'; // Import Riverpod
 import 'package:latlong2/latlong.dart';
+import 'package:westigov2/providers/facility_provider.dart'; // Import Provider
 import 'package:westigov2/utils/constants.dart';
 
-class MapScreen extends StatefulWidget {
+// Change to ConsumerStatefulWidget
+class MapScreen extends ConsumerStatefulWidget {
   const MapScreen({super.key});
 
   @override
-  State<MapScreen> createState() => _MapScreenState();
+  ConsumerState<MapScreen> createState() => _MapScreenState();
 }
 
-class _MapScreenState extends State<MapScreen> {
-  // Center of West Visayas State University
+class _MapScreenState extends ConsumerState<MapScreen> {
+  // Use your custom coordinates here
   static final LatLng _wvsuCenter = LatLng(10.712805, 122.562543);
   final MapController _mapController = MapController();
 
@@ -23,18 +26,35 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Watch the facilities provider
+    final facilitiesAsyncValue = ref.watch(facilitiesProvider);
+
+    // Debug Listener: Print to console when data arrives
+    ref.listen(facilitiesProvider, (previous, next) {
+      next.when(
+        data: (facilities) {
+          print('✅ SUCCESS: Fetched ${facilities.length} facilities from Supabase!');
+          for (var f in facilities) {
+            print(' - ${f.name} at [${f.latitude}, ${f.longitude}]');
+          }
+        },
+        error: (err, stack) => print('❌ ERROR: $err'),
+        loading: () => print('⏳ Loading facilities...'),
+      );
+    });
+
     return Scaffold(
       body: FlutterMap(
         mapController: _mapController,
         options: MapOptions(
           initialCenter: _wvsuCenter,
-          initialZoom: 17.0, // Close enough to see buildings
-          minZoom: 15.0,     // Don't let them zoom out to the whole world
+          initialZoom: 17.0,
+          minZoom: 15.0,
           maxZoom: 19.0,
           cameraConstraint: CameraConstraint.contain(
             bounds: LatLngBounds(
-              LatLng(10.7050, 122.5520), // Southwest bound (approx)
-              LatLng(10.7205, 122.5730), // Northeast bound (approx)
+              LatLng(10.7050, 122.5520), 
+              LatLng(10.7205, 122.5730), 
             ),
           ),
           interactionOptions: const InteractionOptions(
@@ -42,22 +62,17 @@ class _MapScreenState extends State<MapScreen> {
           ),
         ),
         children: [
-          // 1. OpenStreetMap Tiles
           TileLayer(
             urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-            userAgentPackageName: 'com.wvsu.westigo', // Required by OSM
+            userAgentPackageName: 'com.wvsu.westigo',
             subdomains: const ['a', 'b', 'c'],
           ),
-
-          // 2. Attribution (Required by OSM)
           const RichAttributionWidget(
             attributions: [
-              TextSourceAttribution(
-                'OpenStreetMap contributors',
-                onTap: null, // Can add link logic later if needed
-              ),
+              TextSourceAttribution('OpenStreetMap contributors', onTap: null),
             ],
           ),
+          // Note: We haven't added the MarkerLayer yet (Next Sub-Phase)
         ],
       ),
     );
