@@ -3,6 +3,7 @@ import 'package:westigov2/models/app_auth_response.dart';
 
 class AuthService {
   final SupabaseClient _supabase;
+  User? get currentUser => _supabase.auth.currentUser;
 
   AuthService(this._supabase);
 
@@ -21,17 +22,19 @@ class AuthService {
       if (response.user != null) {
         return AppAuthResponse(success: true, userId: response.user!.id);
       }
-      return AppAuthResponse(success: false, error: 'Login failed: No user returned');
-      
+      return AppAuthResponse(
+          success: false, error: 'Login failed: No user returned');
     } on AuthException catch (e) {
       return AppAuthResponse(success: false, error: e.message);
     } catch (e) {
-      return AppAuthResponse(success: false, error: 'An unexpected error occurred');
+      return AppAuthResponse(
+          success: false, error: 'An unexpected error occurred');
     }
   }
 
   /// Real Signup
-  Future<AppAuthResponse> signUp(String email, String password, Map<String, dynamic> data) async {
+  Future<AppAuthResponse> signUp(
+      String email, String password, Map<String, dynamic> data) async {
     try {
       // 1. Create Auth User
       final response = await _supabase.auth.signUp(
@@ -40,7 +43,8 @@ class AuthService {
       );
 
       if (response.user == null) {
-        return AppAuthResponse(success: false, error: 'Signup failed: No user created');
+        return AppAuthResponse(
+            success: false, error: 'Signup failed: No user created');
       }
 
       final userId = response.user!.id;
@@ -57,13 +61,13 @@ class AuthService {
       });
 
       return AppAuthResponse(success: true, userId: userId);
-
     } on AuthException catch (e) {
       return AppAuthResponse(success: false, error: e.message);
     } catch (e) {
-      // If insert fails, we should technically cleanup the auth user, 
+      // If insert fails, we should technically cleanup the auth user,
       // but for this phase we will just report the error.
-      return AppAuthResponse(success: false, error: 'Error creating profile: $e');
+      return AppAuthResponse(
+          success: false, error: 'Error creating profile: $e');
     }
   }
 
@@ -80,7 +84,25 @@ class AuthService {
     } on AuthException catch (e) {
       return AppAuthResponse(success: false, error: e.message);
     } catch (e) {
-      return AppAuthResponse(success: false, error: 'An unexpected error occurred');
+      return AppAuthResponse(
+          success: false, error: 'An unexpected error occurred');
+    }
+  }
+
+  /// Update User Email
+  Future<AppAuthResponse> updateEmail(String newEmail) async {
+    try {
+      await _supabase.auth.updateUser(UserAttributes(email: newEmail));
+      // Update 'users' table email for consistency (optional, but good for display)
+      // Note: Ideally we wait for email confirmation webhook, but we can update display email now
+      // OR rely on Auth State Change. Supabase usually requires confirmation first.
+
+      return AppAuthResponse(success: true);
+    } on AuthException catch (e) {
+      return AppAuthResponse(success: false, error: e.message);
+    } catch (e) {
+      return AppAuthResponse(
+          success: false, error: 'An unexpected error occurred');
     }
   }
 }
