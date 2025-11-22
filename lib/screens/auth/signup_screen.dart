@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:westigov2/utils/constants.dart';
 import 'package:westigov2/utils/validators.dart';
+import 'package:westigov2/widgets/password_strength_indicator.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -115,7 +116,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
                   // Course Dropdown
                   DropdownButtonFormField<String>(
-                    value: _selectedCourse,
+                    initialValue: _selectedCourse,
                     decoration: const InputDecoration(
                       labelText: 'Course/College',
                       border: OutlineInputBorder(),
@@ -130,7 +131,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
                   // Year Level Dropdown
                   DropdownButtonFormField<String>(
-                    value: _selectedYearLevel,
+                    initialValue: _selectedYearLevel,
                     decoration: const InputDecoration(
                       labelText: 'Year Level',
                       border: OutlineInputBorder(),
@@ -160,6 +161,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   TextFormField(
                     controller: _passwordController,
                     obscureText: _obscurePassword,
+                    onChanged: (val) => setState(() {}), // Trigger rebuild for strength indicator
                     decoration: InputDecoration(
                       labelText: 'Password',
                       prefixIcon: const Icon(Icons.lock_outline),
@@ -168,11 +170,11 @@ class _SignupScreenState extends State<SignupScreen> {
                         onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                       ),
                       border: const OutlineInputBorder(),
-                      helperText: 'Min 8 chars, 1 upper, 1 lower, 1 number',
-                      helperMaxLines: 2,
+                      // Removed helperText to use our custom indicator
                     ),
                     validator: Validators.validatePassword,
                   ),
+                  PasswordStrengthIndicator(password: _passwordController.text),
                   const SizedBox(height: 16),
 
                   // Confirm Password
