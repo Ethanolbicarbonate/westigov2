@@ -10,6 +10,7 @@ import 'package:westigov2/screens/profile/change_password_screen.dart';
 import 'package:westigov2/screens/profile/edit_profile_screen.dart';
 import 'package:westigov2/utils/constants.dart';
 import 'package:westigov2/utils/helpers.dart';
+import 'package:westigov2/screens/profile/account_info_screen.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -294,6 +295,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                   child: Column(
                     children: [
+                      _buildSettingsItem(Icons.info_outline, 'Account Info',
+                          () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => const AccountInfoScreen()));
+                      }),
+                      const Divider(height: 1),
                       _buildSettingsItem(Icons.email_outlined, 'Change Email',
                           () {
                         Navigator.push(

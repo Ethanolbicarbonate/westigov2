@@ -29,12 +29,13 @@ class _ChangeEmailScreenState extends ConsumerState<ChangeEmailScreen> {
 
       if (response.success) {
         AppHelpers.showSuccessSnackbar(
-          context, 
+          context,
           'Confirmation link sent to ${_emailController.text}. Please verify.',
         );
         Navigator.pop(context);
       } else {
-        AppHelpers.showErrorSnackbar(context, response.error ?? 'Failed to update email');
+        AppHelpers.showErrorSnackbar(
+            context, response.error ?? 'Failed to update email');
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -43,7 +44,8 @@ class _ChangeEmailScreenState extends ConsumerState<ChangeEmailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final currentEmail = ref.read(authServiceProvider).currentUser?.email ?? 'Unknown';
+    final currentEmail =
+        ref.read(authServiceProvider).currentUser?.email ?? 'Unknown';
 
     return Scaffold(
       appBar: AppBar(
@@ -52,43 +54,48 @@ class _ChangeEmailScreenState extends ConsumerState<ChangeEmailScreen> {
         foregroundColor: AppColors.textDark,
         elevation: 0,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(AppSizes.paddingL),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Current Email', style: TextStyle(color: Colors.grey)),
-              const SizedBox(height: 4),
-              Text(currentEmail, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 24),
-              
-              TextFormField(
-                controller: _emailController,
-                decoration: const InputDecoration(
-                  labelText: 'New Email Address',
-                  border: OutlineInputBorder(),
-                ),
-                validator: Validators.validateEmail,
-              ),
-              const SizedBox(height: 32),
-              
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _updateEmail,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+      body: GestureDetector(
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        behavior: HitTestBehavior.translucent,
+        child: Padding(
+          padding: const EdgeInsets.all(AppSizes.paddingL),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Current Email',
+                    style: TextStyle(color: Colors.grey)),
+                const SizedBox(height: 4),
+                Text(currentEmail,
+                    style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 24),
+                TextFormField(
+                  controller: _emailController,
+                  decoration: const InputDecoration(
+                    labelText: 'New Email Address',
+                    border: OutlineInputBorder(),
                   ),
-                  child: _isLoading 
-                      ? const CircularProgressIndicator(color: Colors.white) 
-                      : const Text('Send Confirmation Link'),
+                  validator: Validators.validateEmail,
                 ),
-              ),
-            ],
+                const SizedBox(height: 32),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _updateEmail,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    child: _isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : const Text('Send Confirmation Link'),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -10,7 +10,8 @@ class ChangePasswordScreen extends ConsumerStatefulWidget {
   const ChangePasswordScreen({super.key});
 
   @override
-  ConsumerState<ChangePasswordScreen> createState() => _ChangePasswordScreenState();
+  ConsumerState<ChangePasswordScreen> createState() =>
+      _ChangePasswordScreenState();
 }
 
 class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
@@ -31,10 +32,12 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
       if (!mounted) return;
 
       if (response.success) {
-        AppHelpers.showSuccessSnackbar(context, 'Password updated successfully');
+        AppHelpers.showSuccessSnackbar(
+            context, 'Password updated successfully');
         Navigator.pop(context);
       } else {
-        AppHelpers.showErrorSnackbar(context, response.error ?? 'Failed to update password');
+        AppHelpers.showErrorSnackbar(
+            context, response.error ?? 'Failed to update password');
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -50,55 +53,59 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
         foregroundColor: AppColors.textDark,
         elevation: 0,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(AppSizes.paddingL),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              TextFormField(
-                controller: _passwordController,
-                obscureText: _obscure,
-                onChanged: (v) => setState(() {}),
-                decoration: InputDecoration(
-                  labelText: 'New Password',
-                  border: const OutlineInputBorder(),
-                  suffixIcon: IconButton(
-                    icon: Icon(_obscure ? Icons.visibility_off : Icons.visibility),
-                    onPressed: () => setState(() => _obscure = !_obscure),
+      body: GestureDetector(
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        behavior: HitTestBehavior.translucent,
+        child: Padding(
+          padding: const EdgeInsets.all(AppSizes.paddingL),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                TextFormField(
+                  controller: _passwordController,
+                  obscureText: _obscure,
+                  onChanged: (v) => setState(() {}),
+                  decoration: InputDecoration(
+                    labelText: 'New Password',
+                    border: const OutlineInputBorder(),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                          _obscure ? Icons.visibility_off : Icons.visibility),
+                      onPressed: () => setState(() => _obscure = !_obscure),
+                    ),
+                  ),
+                  validator: Validators.validatePassword,
+                ),
+                PasswordStrengthIndicator(password: _passwordController.text),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _confirmController,
+                  obscureText: _obscure,
+                  decoration: const InputDecoration(
+                    labelText: 'Confirm New Password',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (v) => Validators.validateConfirmPassword(
+                      v, _passwordController.text),
+                ),
+                const SizedBox(height: 32),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _updatePassword,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    child: _isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : const Text('Update Password'),
                   ),
                 ),
-                validator: Validators.validatePassword,
-              ),
-              PasswordStrengthIndicator(password: _passwordController.text),
-              const SizedBox(height: 16),
-              
-              TextFormField(
-                controller: _confirmController,
-                obscureText: _obscure,
-                decoration: const InputDecoration(
-                  labelText: 'Confirm New Password',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (v) => Validators.validateConfirmPassword(v, _passwordController.text),
-              ),
-              const SizedBox(height: 32),
-
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _updatePassword,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                  child: _isLoading 
-                      ? const CircularProgressIndicator(color: Colors.white) 
-                      : const Text('Update Password'),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

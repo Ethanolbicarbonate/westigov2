@@ -24,11 +24,23 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   bool _isLoading = false;
 
   final List<String> _courses = [
-    'CICT', 'COE', 'CBM', 'CAS', 'CON', 'PESCAR', 'COM', 'COD', 'COL', 'COC'
+    'CICT',
+    'COE',
+    'CBM',
+    'CAS',
+    'CON',
+    'PESCAR',
+    'COM',
+    'COD',
+    'COL',
+    'COC'
   ];
-  
+
   final List<String> _yearLevels = [
-    '1st Year', '2nd Year', '3rd Year', '4th Year'
+    '1st Year',
+    '2nd Year',
+    '3rd Year',
+    '4th Year'
   ];
 
   @override
@@ -36,10 +48,13 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     super.initState();
     _firstNameController = TextEditingController(text: widget.user.firstName);
     _lastNameController = TextEditingController(text: widget.user.lastName);
-    
+
     // Handle case where saved course might not be in our current list (legacy data safety)
-    _selectedCourse = _courses.contains(widget.user.course) ? widget.user.course : null;
-    _selectedYearLevel = _yearLevels.contains(widget.user.yearLevel) ? widget.user.yearLevel : null;
+    _selectedCourse =
+        _courses.contains(widget.user.course) ? widget.user.course : null;
+    _selectedYearLevel = _yearLevels.contains(widget.user.yearLevel)
+        ? widget.user.yearLevel
+        : null;
   }
 
   @override
@@ -51,7 +66,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   Future<void> _saveProfile() async {
     if (!_formKey.currentState!.validate()) return;
-    
+
     setState(() => _isLoading = true);
 
     try {
@@ -73,7 +88,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       if (!mounted) return;
       AppHelpers.showSuccessSnackbar(context, 'Profile updated successfully');
       Navigator.pop(context);
-      
     } catch (e) {
       AppHelpers.showErrorSnackbar(context, 'Failed to update profile: $e');
     } finally {
@@ -90,55 +104,72 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         foregroundColor: AppColors.textDark,
         elevation: 0,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSizes.paddingL),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              TextFormField(
-                controller: _firstNameController,
-                decoration: const InputDecoration(labelText: 'First Name', border: OutlineInputBorder()),
-                validator: (v) => Validators.validateRequired(v, 'First Name'),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _lastNameController,
-                decoration: const InputDecoration(labelText: 'Last Name', border: OutlineInputBorder()),
-                validator: (v) => Validators.validateRequired(v, 'Last Name'),
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                value: _selectedCourse,
-                decoration: const InputDecoration(labelText: 'Course', border: OutlineInputBorder()),
-                items: _courses.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
-                onChanged: (val) => setState(() => _selectedCourse = val),
-                validator: (v) => v == null ? 'Required' : null,
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                value: _selectedYearLevel,
-                decoration: const InputDecoration(labelText: 'Year Level', border: OutlineInputBorder()),
-                items: _yearLevels.map((y) => DropdownMenuItem(value: y, child: Text(y))).toList(),
-                onChanged: (val) => setState(() => _selectedYearLevel = val),
-                validator: (v) => v == null ? 'Required' : null,
-              ),
-              const SizedBox(height: 32),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _saveProfile,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                  child: _isLoading 
-                      ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white))
-                      : const Text('Save Changes'),
+      body: GestureDetector(
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        behavior: HitTestBehavior.translucent,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(AppSizes.paddingL),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                TextFormField(
+                  controller: _firstNameController,
+                  decoration: const InputDecoration(
+                      labelText: 'First Name', border: OutlineInputBorder()),
+                  validator: (v) =>
+                      Validators.validateRequired(v, 'First Name'),
                 ),
-              ),
-            ],
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _lastNameController,
+                  decoration: const InputDecoration(
+                      labelText: 'Last Name', border: OutlineInputBorder()),
+                  validator: (v) => Validators.validateRequired(v, 'Last Name'),
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  initialValue: _selectedCourse,
+                  decoration: const InputDecoration(
+                      labelText: 'Course', border: OutlineInputBorder()),
+                  items: _courses
+                      .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                      .toList(),
+                  onChanged: (val) => setState(() => _selectedCourse = val),
+                  validator: (v) => v == null ? 'Required' : null,
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  initialValue: _selectedYearLevel,
+                  decoration: const InputDecoration(
+                      labelText: 'Year Level', border: OutlineInputBorder()),
+                  items: _yearLevels
+                      .map((y) => DropdownMenuItem(value: y, child: Text(y)))
+                      .toList(),
+                  onChanged: (val) => setState(() => _selectedYearLevel = val),
+                  validator: (v) => v == null ? 'Required' : null,
+                ),
+                const SizedBox(height: 32),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _saveProfile,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child:
+                                CircularProgressIndicator(color: Colors.white))
+                        : const Text('Save Changes'),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
