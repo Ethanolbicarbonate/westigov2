@@ -17,7 +17,7 @@ class EventsScreen extends ConsumerStatefulWidget {
 class _EventsScreenState extends ConsumerState<EventsScreen> {
   @override
   Widget build(BuildContext context) {
-    final eventsAsync = ref.watch(eventsProvider);
+    final eventsAsync = ref.watch(filteredEventsProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
