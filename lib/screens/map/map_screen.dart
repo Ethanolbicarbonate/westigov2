@@ -95,7 +95,15 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                   }).toList(),
                 ),
                 loading: () => const MarkerLayer(markers: []),
-                error: (err, stack) => const MarkerLayer(markers: []),
+                error: (err, stack) {
+                  // Only show snackbar once
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Failed to load map pins: $err')),
+                    );
+                  });
+                  return const MarkerLayer(markers: []);
+                },
               ),
 
               const RichAttributionWidget(
