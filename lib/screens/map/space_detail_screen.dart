@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:westigov2/models/space.dart';
 import 'package:westigov2/utils/constants.dart';
+import 'package:westigov2/widgets/favorite_button.dart';
 
 class SpaceDetailScreen extends StatelessWidget {
   final Space space;
   // Optional: pass parent name if available to show context
-  final String? parentFacilityName; 
+  final String? parentFacilityName;
 
   const SpaceDetailScreen({
-    super.key, 
+    super.key,
     required this.space,
     this.parentFacilityName,
   });
@@ -20,6 +21,9 @@ class SpaceDetailScreen extends StatelessWidget {
         title: Text(space.name),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
+        actions: [
+          FavoriteButton(type: 'space', id: space.id),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSizes.paddingL),
@@ -39,7 +43,7 @@ class SpaceDetailScreen extends StatelessWidget {
                       Container(height: 200, color: Colors.grey[200]),
                 ),
               ),
-            
+
             const SizedBox(height: 24),
 
             // Info Card
@@ -50,14 +54,19 @@ class SpaceDetailScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(AppSizes.radiusM),
                 border: Border.all(color: Colors.grey.shade200),
                 boxShadow: const [
-                   BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0,2))
+                  BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 4,
+                      offset: Offset(0, 2))
                 ],
               ),
               child: Column(
                 children: [
-                  _buildInfoRow(Icons.apartment, 'Location', parentFacilityName ?? 'Campus Facility'),
+                  _buildInfoRow(Icons.apartment, 'Location',
+                      parentFacilityName ?? 'Campus Facility'),
                   const Divider(),
-                  _buildInfoRow(Icons.layers, 'Floor', space.floorLevel ?? 'Unknown'),
+                  _buildInfoRow(
+                      Icons.layers, 'Floor', space.floorLevel ?? 'Unknown'),
                 ],
               ),
             ),
@@ -94,7 +103,8 @@ class SpaceDetailScreen extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+              Text(label,
+                  style: const TextStyle(color: Colors.grey, fontSize: 12)),
               Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
             ],
           ),

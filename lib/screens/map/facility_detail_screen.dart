@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:westigov2/models/facility.dart';
 import 'package:westigov2/providers/facility_provider.dart';
 import 'package:westigov2/utils/constants.dart';
-import 'package:westigov2/screens/map/space_detail_screen.dart'; // Import
+import 'package:westigov2/screens/map/space_detail_screen.dart';
+import 'package:westigov2/widgets/favorite_button.dart';
 
 class FacilityDetailScreen extends ConsumerWidget {
   final Facility facility;
@@ -23,6 +24,9 @@ class FacilityDetailScreen extends ConsumerWidget {
             expandedHeight: 200.0,
             floating: false,
             pinned: true,
+            actions: [
+              FavoriteButton(type: 'facility', id: facility.id),
+            ],
             flexibleSpace: FlexibleSpaceBar(
               title: Text(
                 facility.name,
