@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:westigov2/models/favorite.dart';
 import 'package:westigov2/models/space.dart';
+import 'package:westigov2/models/event.dart';
 
 class FavoriteService {
   final SupabaseClient _supabase;
@@ -50,6 +51,29 @@ class FavoriteService {
 
     return (spacesResponse as List)
         .map((json) => Space.fromJson(json))
+        .toList();
+  }
+
+  Future<List<Event>> getFavoriteEvents(String userId) async {
+    // 1. Get IDs
+    final favResponse = await _supabase
+        .from('favorites')
+        .select('favoritable_id')
+        .eq('user_id', userId)
+        .eq('favoritable_type', 'event');
+
+    final ids =
+        (favResponse as List).map((r) => r['favoritable_id'] as int).toList();
+
+    if (ids.isEmpty) return [];
+
+    // 2. Fetch events matching IDs
+    // Note: We might want location names too, but let's stick to basic fetch for consistency with list
+    final eventsResponse =
+        await _supabase.from('events').select().inFilter('id', ids);
+
+    return (eventsResponse as List)
+        .map((json) => Event.fromJson(json))
         .toList();
   }
 }
