@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:westigov2/providers/event_provider.dart';
 import 'package:westigov2/utils/constants.dart';
 import 'package:westigov2/widgets/event_card.dart';
+import 'package:westigov2/screens/events/event_detail_screen.dart';
+import 'package:westigov2/widgets/event_filter_sheet.dart';
+import 'package:westigov2/providers/event_filter_provider.dart';
 
 class EventsScreen extends ConsumerStatefulWidget {
   const EventsScreen({super.key});
@@ -29,38 +32,76 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
         actions: [
           // Filter Button
           IconButton(
-            icon: const Icon(Icons.filter_list),
+            icon: Stack(
+              alignment: Alignment.center,
+              children: [
+                const Icon(Icons.filter_list),
+                // Optional Badge if filters active
+                Consumer(builder: (context, ref, _) {
+                  final hasFilters = ref.watch(eventFilterProvider).hasFilters;
+                  if (!hasFilters) return const SizedBox.shrink();
+                  return Positioned(
+                    top: 0,
+                    right: 0,
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  );
+                }),
+              ],
+            ),
             onPressed: () {
-              // TODO: Open Filter Sheet
-              print('Filter tapped');
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (context) => const EventFilterSheet(),
+              );
             },
           ),
         ],
       ),
       body: eventsAsync.when(
         data: (events) {
-          // Debug Print
-          if (events.isNotEmpty) {
-            print('✅ Loaded ${events.length} events');
-            for (var e in events) {
-              print(' - ${e.name} (${e.scopes})');
-            }
-          }
-
           if (events.isEmpty) {
-            return const Center(
+            return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.event_busy, size: 64, color: Colors.grey),
-                  SizedBox(height: 16),
-                  Text('No upcoming events'),
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.event_busy,
+                        size: 64, color: AppColors.primary),
+                  ),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'No upcoming events',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Check back later for campus updates',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                  const SizedBox(height: 24),
+                  OutlinedButton(
+                    onPressed: () => ref.refresh(eventsProvider),
+                    child: const Text('Refresh'),
+                  ),
                 ],
               ),
             );
           }
 
-          // Placeholder List
           return RefreshIndicator(
             onRefresh: () => ref.refresh(eventsProvider.future),
             child: ListView.separated(
@@ -69,21 +110,48 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
               separatorBuilder: (_, __) => const SizedBox(height: 16),
               itemBuilder: (context, index) {
                 final event = events[index];
-                // Temporary Placeholder Card
                 return EventCard(
                   event: event,
                   onTap: () {
-                    // TODO: Navigate to Detail
-                    print('Tapped ${event.name}');
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => EventDetailScreen(event: event),
+                      ),
+                    );
                   },
                 );
               },
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(
+          child: CircularProgressIndicator(),
+        ),
         error: (err, stack) => Center(
-          child: Text('Error loading events: $err'),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 48, color: Colors.red),
+              const SizedBox(height: 16),
+              Text(
+                'Something went wrong',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                err.toString().contains('SocketException')
+                    ? 'Check your internet connection'
+                    : 'Failed to load events',
+                style: const TextStyle(color: Colors.grey),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () => ref.refresh(eventsProvider),
+                child: const Text('Try Again'),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -1,0 +1,160 @@
+import 'package:flutter/material.dart';
+import 'package:westigov2/models/event.dart';
+import 'package:westigov2/utils/constants.dart';
+import 'package:westigov2/utils/helpers.dart';
+import 'package:westigov2/widgets/favorite_button.dart'; // Reuse from Phase 4
+
+class EventDetailScreen extends StatelessWidget {
+  final Event event;
+
+  const EventDetailScreen({super.key, required this.event});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: CustomScrollView(
+        slivers: [
+          // 1. Hero Image App Bar
+          SliverAppBar(
+            expandedHeight: 250.0,
+            floating: false,
+            pinned: true,
+            actions: [
+              // Reuse our Favorite Button (Polymorphic ID logic might need tweak if IDs overlap, 
+              // but for now distinct types 'event' vs 'facility' handles it)
+              FavoriteButton(type: 'event', id: event.id),
+            ],
+            flexibleSpace: FlexibleSpaceBar(
+              background: event.imageUrl != null
+                  ? Image.network(
+                      event.imageUrl!,
+                      fit: BoxFit.cover,
+                      color: Colors.black.withOpacity(0.2),
+                      colorBlendMode: BlendMode.darken,
+                    )
+                  : Container(color: AppColors.primary),
+            ),
+          ),
+
+          // 2. Content
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(AppSizes.paddingL),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Title
+                  Text(
+                    event.name,
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textDark,
+                        ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Info Row (Date & Time)
+                  _buildInfoRow(
+                    Icons.calendar_today, 
+                    AppHelpers.formatDateTime(event.startDate)
+                  ),
+                  const SizedBox(height: 12),
+                  
+                  // Info Row (Location)
+                  // Note: location_id is just an int. In a real app we'd fetch the name.
+                  // For this phase, we'll put a placeholder or "View on Map" button.
+                  _buildInfoRow(
+                    Icons.location_on, 
+                    'Tap to view location', 
+                    isLink: true,
+                    onTap: () {
+                      // TODO: Navigate to Map/Space Detail
+                      ScaffoldMessenger.of(context).showSnackBar(
+                         const SnackBar(content: Text('Map navigation coming soon'))
+                      );
+                    },
+                  ),
+
+                  const SizedBox(height: 24),
+                  const Divider(),
+                  const SizedBox(height: 24),
+
+                  // Description
+                  if (event.description != null) ...[
+                    Text(
+                      'About this Event',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      event.description!,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            height: 1.5,
+                            color: Colors.grey[800],
+                          ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+
+                  // Audience Scopes
+                  Text(
+                    'Who should attend?',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey,
+                        ),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: event.scopes.map((s) => Chip(
+                      label: Text(s),
+                      backgroundColor: AppColors.background,
+                      labelStyle: const TextStyle(fontSize: 12),
+                    )).toList(),
+                  ),
+                  
+                  // Bottom Padding
+                  const SizedBox(height: 40),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(IconData icon, String text, {bool isLink = false, VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, color: AppColors.primary, size: 20),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: isLink ? AppColors.primary : AppColors.textDark,
+                decoration: isLink ? TextDecoration.underline : null,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
