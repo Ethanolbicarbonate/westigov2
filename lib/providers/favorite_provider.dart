@@ -2,11 +2,26 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:westigov2/models/favorite.dart';
 import 'package:westigov2/providers/auth_provider.dart';
 import 'package:westigov2/services/favorite_service.dart';
+import 'package:westigov2/models/space.dart';
 
 // Service Provider
 final favoriteServiceProvider = Provider<FavoriteService>((ref) {
   final supabase = ref.watch(supabaseClientProvider);
   return FavoriteService(supabase);
+});
+
+final favoriteSpacesListProvider = FutureProvider<List<Space>>((ref) async {
+  final service = ref.read(favoriteServiceProvider);
+  final authState = ref.read(authServiceProvider);
+  final userId = authState.currentUserId;
+
+  if (userId == null) return [];
+
+  // We depend on the main favorites list changing to re-fetch this details list
+  // So we watch userFavoritesProvider to trigger a refresh when IDs change
+  ref.watch(userFavoritesProvider);
+
+  return await service.getFavoriteSpaces(userId);
 });
 
 // User Favorites List Provider
@@ -43,17 +58,17 @@ class FavoriteNotifier extends StateNotifier<AsyncValue<List<Favorite>>> {
       // Remove immediately from UI
       state = AsyncValue.data(currentList.where((f) => !(f.favoritableType == type && f.favoritableId == id)).toList());
       try {
-        await _service.removeFavorite(_userId!, type, id);
+        await _service.removeFavorite(_userId, type, id);
       } catch (e) {
         // Revert if failed
         _fetchFavorites();
       }
     } else {
       // Add immediately to UI (with temp ID)
-      final newFav = Favorite(id: -1, userId: _userId!, favoritableType: type, favoritableId: id);
+      final newFav = Favorite(id: -1, userId: _userId, favoritableType: type, favoritableId: id);
       state = AsyncValue.data([...currentList, newFav]);
       try {
-        await _service.addFavorite(_userId!, type, id);
+        await _service.addFavorite(_userId, type, id);
         // Fetch again to get real ID
         _fetchFavorites();
       } catch (e) {

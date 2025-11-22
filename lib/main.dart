@@ -39,7 +39,7 @@ class WestigoApp extends StatelessWidget {
           centerTitle: true,
         ),
       ),
-      home: const EventsScreen(),
+      home: const HomeScreen(),
     );
   }
 }
