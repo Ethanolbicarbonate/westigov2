@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:westigov2/providers/auth_provider.dart';
+import 'package:westigov2/screens/auth/reset_password_screen.dart';
 import 'package:westigov2/screens/auth/signup_screen.dart';
 import 'package:westigov2/screens/home_screen.dart';
 import 'package:westigov2/utils/constants.dart';
@@ -147,7 +148,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       onPressed: isLoading ? null : () {
-                        // TODO: Navigate to Reset Password
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (context) => const ResetPasswordScreen()),
+                        );
                       },
                       child: const Text('Forgot Password?'),
                     ),
