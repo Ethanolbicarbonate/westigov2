@@ -1,35 +1,56 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:westigov2/models/app_auth_response.dart'; // Import renamed model
 
 class AuthService {
   final SupabaseClient _supabase;
 
+  bool _isMockLoggedIn = false;
+  String? _mockUserId;
+
   AuthService(this._supabase);
 
-  // Get the current user session
-  User? get currentUser => _supabase.auth.currentUser;
+  bool get isAuthenticated => _isMockLoggedIn;
+  String? get currentUserId => _mockUserId;
 
-  Stream<AuthState> get authStateChanges => _supabase.auth.onAuthStateChange;
+  Future<AppAuthResponse> signIn(String email, String password) async {
+    await Future.delayed(const Duration(seconds: 1));
 
-  Future<AuthResponse> signIn(String email, String password) async {
-    return await _supabase.auth.signInWithPassword(
-      email: email,
-      password: password,
-    );
+    if (email.isEmpty || password.isEmpty) {
+      return AppAuthResponse(success: false, error: 'Email and password are required');
+    }
+
+    _isMockLoggedIn = true;
+    _mockUserId = 'mock-user-123';
+    
+    return AppAuthResponse(success: true, userId: _mockUserId);
   }
 
-  Future<AuthResponse> signUp(String email, String password) async {
-    return await _supabase.auth.signUp(
-      email: email,
-      password: password,
-    );
+  Future<AppAuthResponse> signUp(String email, String password, Map<String, dynamic> data) async {
+    await Future.delayed(const Duration(seconds: 1));
+
+    if (email.isEmpty || password.isEmpty) {
+      return AppAuthResponse(success: false, error: 'All fields are required');
+    }
+
+    _isMockLoggedIn = true;
+    _mockUserId = 'mock-user-123';
+    
+    print('Mock Signup Data: $data');
+
+    return AppAuthResponse(success: true, userId: _mockUserId);
   }
 
   Future<void> signOut() async {
-    await _supabase.auth.signOut();
+    await Future.delayed(const Duration(milliseconds: 500));
+    _isMockLoggedIn = false;
+    _mockUserId = null;
   }
 
-  // Password reset flow
-  Future<void> sendPasswordResetEmail(String email) async {
-    await _supabase.auth.resetPasswordForEmail(email);
+  Future<AppAuthResponse> sendPasswordResetEmail(String email) async {
+    await Future.delayed(const Duration(seconds: 1));
+    if (email.isEmpty) {
+      return AppAuthResponse(success: false, error: 'Email is required');
+    }
+    return AppAuthResponse(success: true);
   }
 }
