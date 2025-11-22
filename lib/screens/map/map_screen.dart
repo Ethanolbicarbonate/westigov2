@@ -6,6 +6,8 @@ import 'package:westigov2/providers/facility_provider.dart'; // Import Provider
 import 'package:westigov2/utils/constants.dart';
 import 'package:westigov2/widgets/facility_marker.dart';
 import 'package:westigov2/widgets/facility_bottom_sheet.dart';
+import 'package:westigov2/widgets/map_search_bar.dart';
+import 'package:westigov2/providers/search_provider.dart';
 
 // Change to ConsumerStatefulWidget
 class MapScreen extends ConsumerStatefulWidget {
@@ -31,69 +33,97 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     final facilitiesAsyncValue = ref.watch(facilitiesProvider);
 
     return Scaffold(
-      body: FlutterMap(
-        mapController: _mapController,
-        options: MapOptions(
-          // ... (Keep your existing options) ...
-          initialCenter: _wvsuCenter,
-          initialZoom: 17.0,
-          minZoom: 15.0,
-          maxZoom: 19.0,
-          cameraConstraint: CameraConstraint.contain(
-            bounds: LatLngBounds(
-              LatLng(10.7050, 122.5520),
-              LatLng(10.7205, 122.5730),
-            ),
-          ),
-          interactionOptions: const InteractionOptions(
-            flags: InteractiveFlag.all,
-          ),
-        ),
+      body: Stack(
         children: [
-          TileLayer(
-            urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-            userAgentPackageName: 'com.wvsu.westigo',
-            subdomains: const ['a', 'b', 'c'],
-          ),
-
-          // 3. Marker Layer (Only show when data is loaded)
-          facilitiesAsyncValue.when(
-            data: (facilities) => MarkerLayer(
-              markers: facilities.map((facility) {
-                return Marker(
-                  point: LatLng(facility.latitude, facility.longitude),
-                  width: 30,
-                  height: 30,
-                  child: FacilityMarker(
-                    onTap: () {
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled:
-                            true, // Allows sheet to be taller if needed
-                        backgroundColor: Colors.transparent,
-                        builder: (context) => FacilityBottomSheet(
-                          facility: facility,
-                          onViewSpaces: () {
-                            // TODO: Navigate to Full Facility Detail Screen
-                            Navigator.pop(context); // Close sheet for now
-                            print('View Spaces clicked for ${facility.name}');
-                          },
-                        ),
-                      );
-                    },
-                  ),
-                );
-              }).toList(),
+          FlutterMap(
+            mapController: _mapController,
+            options: MapOptions(
+              initialCenter: _wvsuCenter,
+              initialZoom: 17.0,
+              minZoom: 15.0,
+              maxZoom: 19.0,
+              cameraConstraint: CameraConstraint.contain(
+                bounds: LatLngBounds(
+                  LatLng(10.7050, 122.5520),
+                  LatLng(10.7205, 122.5730),
+                ),
+              ),
+              interactionOptions: const InteractionOptions(
+                flags: InteractiveFlag.all,
+              ),
             ),
-            // Show nothing or a loading overlay if needed (though AsyncValue handles it gracefully)
-            loading: () => const MarkerLayer(markers: []),
-            error: (err, stack) => const MarkerLayer(markers: []),
-          ),
+            children: [
+              TileLayer(
+                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                userAgentPackageName: 'com.wvsu.westigo',
+                subdomains: const ['a', 'b', 'c'],
+              ),
 
-          const RichAttributionWidget(
-            attributions: [
-              TextSourceAttribution('OpenStreetMap contributors', onTap: null),
+              /// Marker Layer (Based on AsyncValue)
+              facilitiesAsyncValue.when(
+                data: (facilities) => MarkerLayer(
+                  markers: facilities.map((facility) {
+                    return Marker(
+                      point: LatLng(facility.latitude, facility.longitude),
+                      width: 30,
+                      height: 30,
+                      child: FacilityMarker(
+                        onTap: () {
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            builder: (context) => FacilityBottomSheet(
+                              facility: facility,
+                              onViewSpaces: () {
+                                Navigator.pop(context);
+                                print(
+                                    'View Spaces clicked for ${facility.name}');
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  }).toList(),
+                ),
+                loading: () => const MarkerLayer(markers: []),
+                error: (err, stack) => const MarkerLayer(markers: []),
+              ),
+
+              const RichAttributionWidget(
+                attributions: [
+                  TextSourceAttribution(
+                    'OpenStreetMap contributors',
+                    onTap: null,
+                  ),
+                ],
+              ),
             ],
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: MediaQuery.of(context).padding.bottom + 16,
+            child: MapSearchBar(
+              onTap: () async {
+                // Trigger data fetch for spaces (lazy load)
+                ref.read(allSpacesProvider);
+
+                // Set a query manually to test
+                ref.read(searchQueryProvider.notifier).state = "CICT";
+
+                // Give it a moment to calculate
+                await Future.delayed(const Duration(milliseconds: 500));
+
+                // Read results
+                final results = ref.read(searchResultsProvider);
+                print('--- Search Results for "CICT" ---');
+                for (var r in results) {
+                  print('[${r.type}] ${r.name}');
+                }
+              },
+            ),
           ),
         ],
       ),

@@ -7,11 +7,10 @@ class SpaceService {
   SpaceService(this._supabase);
 
   /// Fetch spaces belonging to a specific facility
-  Future<List<Space>> getSpacesByFacility(int facilityId) async {
+  Future<List<Space>> getAllSpaces() async {
     final response = await _supabase
         .from('spaces')
         .select()
-        .eq('parent_facility_id', facilityId)
         .order('name', ascending: true);
 
     return (response as List).map((json) => Space.fromJson(json)).toList();
