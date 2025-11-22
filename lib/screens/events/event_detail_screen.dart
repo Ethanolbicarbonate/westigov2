@@ -1,16 +1,60 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:westigov2/models/event.dart';
+import 'package:westigov2/providers/search_provider.dart'; 
+import 'package:westigov2/screens/map/space_detail_screen.dart';
 import 'package:westigov2/utils/constants.dart';
 import 'package:westigov2/utils/helpers.dart';
-import 'package:westigov2/widgets/favorite_button.dart'; // Reuse from Phase 4
+import 'package:westigov2/widgets/favorite_button.dart';
 
-class EventDetailScreen extends StatelessWidget {
+class EventDetailScreen extends ConsumerWidget {
   final Event event;
 
   const EventDetailScreen({super.key, required this.event});
 
+  Future<void> _handleLocationTap(BuildContext context, WidgetRef ref) async {
+    if (event.locationId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No location specified for this event')),
+      );
+      return;
+    }
+
+    try {
+      // Fetch the space details using the service provider
+      final spaceService = ref.read(spaceServiceProvider);
+      
+      // Note: Ensure your SpaceService has a getSpaceById method implemented
+      final space = await spaceService.getSpaceById(event.locationId!);
+      
+      if (context.mounted) {
+        if (space != null) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => SpaceDetailScreen(
+                space: space,
+                // If you have parent/building info, pass it here, otherwise default is fine
+              ),
+            ),
+          );
+        } else {
+           ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Location details not found')),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading location: $e')),
+        );
+      }
+    }
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -20,8 +64,6 @@ class EventDetailScreen extends StatelessWidget {
             floating: false,
             pinned: true,
             actions: [
-              // Reuse our Favorite Button (Polymorphic ID logic might need tweak if IDs overlap, 
-              // but for now distinct types 'event' vs 'facility' handles it)
               FavoriteButton(type: 'event', id: event.id),
             ],
             flexibleSpace: FlexibleSpaceBar(
@@ -61,18 +103,11 @@ class EventDetailScreen extends StatelessWidget {
                   const SizedBox(height: 12),
                   
                   // Info Row (Location)
-                  // Note: location_id is just an int. In a real app we'd fetch the name.
-                  // For this phase, we'll put a placeholder or "View on Map" button.
                   _buildInfoRow(
                     Icons.location_on, 
                     'Tap to view location', 
                     isLink: true,
-                    onTap: () {
-                      // TODO: Navigate to Map/Space Detail
-                      ScaffoldMessenger.of(context).showSnackBar(
-                         const SnackBar(content: Text('Map navigation coming soon'))
-                      );
-                    },
+                    onTap: () => _handleLocationTap(context, ref),
                   ),
 
                   const SizedBox(height: 24),

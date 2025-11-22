@@ -31,4 +31,15 @@ class SpaceService {
 
     return (response as List).map((json) => Space.fromJson(json)).toList();
   }
+
+  /// Fetch single space by ID
+  Future<Space?> getSpaceById(int id) async {
+    try {
+      final response =
+          await _supabase.from('spaces').select().eq('id', id).single();
+      return Space.fromJson(response);
+    } catch (e) {
+      return null;
+    }
+  }
 }

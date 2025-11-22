@@ -45,4 +45,18 @@ class FacilityService {
       rethrow;
     }
   }
+
+  /// Fetch single facility by ID
+  Future<Facility?> getFacilityById(int id) async {
+    try {
+      final response = await _supabase
+          .from('facilities')
+          .select()
+          .eq('id', id)
+          .single();
+      return Facility.fromJson(response);
+    } catch (e) {
+      return null;
+    }
+  }
 }
