@@ -30,7 +30,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   bool _obscureConfirmPassword = true;
 
   final List<String> _courses = [
-    'CICT', 'COE', 'CBM', 'CAS', 'COED', 'CPAG', 'CN', 'PESCAR', 'COM', 'COD', 'COL'
+    'CICT', 'COE', 'CBM', 'CAS', 'CON', 'PESCAR', 'COM', 'COD', 'COL', 'COC'
   ];
   
   final List<String> _yearLevels = [

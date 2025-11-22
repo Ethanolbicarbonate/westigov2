@@ -8,7 +8,7 @@ class EventFilterSheet extends ConsumerWidget {
 
   final List<String> _years = const ['1st years', '2nd years', '3rd years', '4th years'];
   final List<String> _colleges = const [
-    'CICT', 'COE', 'CBM', 'CAS', 'COED', 'CPAG', 'CN', 'PESCAR', 'COM', 'COD', 'COL'
+    'CICT', 'COE', 'CBM', 'CAS', 'CON', 'PESCAR', 'COM', 'COD', 'COL', 'COC'
   ];
 
   @override
