@@ -8,6 +8,7 @@ import 'package:westigov2/widgets/facility_marker.dart';
 import 'package:westigov2/widgets/facility_bottom_sheet.dart';
 import 'package:westigov2/widgets/map_search_bar.dart';
 import 'package:westigov2/providers/search_provider.dart';
+import 'package:westigov2/screens/map/search_screen.dart';
 
 // Change to ConsumerStatefulWidget
 class MapScreen extends ConsumerStatefulWidget {
@@ -106,22 +107,21 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             right: 0,
             bottom: MediaQuery.of(context).padding.bottom + 16,
             child: MapSearchBar(
-              onTap: () async {
-                // Trigger data fetch for spaces (lazy load)
+              onTap: () {
+                // Ensure spaces are loaded
                 ref.read(allSpacesProvider);
 
-                // Set a query manually to test
-                ref.read(searchQueryProvider.notifier).state = "CICT";
-
-                // Give it a moment to calculate
-                await Future.delayed(const Duration(milliseconds: 500));
-
-                // Read results
-                final results = ref.read(searchResultsProvider);
-                print('--- Search Results for "CICT" ---');
-                for (var r in results) {
-                  print('[${r.type}] ${r.name}');
-                }
+                Navigator.of(context).push(
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation, secondaryAnimation) =>
+                        const SearchScreen(),
+                    transitionsBuilder:
+                        (context, animation, secondaryAnimation, child) {
+                      // Fade transition
+                      return FadeTransition(opacity: animation, child: child);
+                    },
+                  ),
+                );
               },
             ),
           ),
