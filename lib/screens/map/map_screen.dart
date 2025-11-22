@@ -3,6 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart'; // Import Riverpod
 import 'package:latlong2/latlong.dart';
 import 'package:westigov2/providers/facility_provider.dart'; // Import Provider
+import 'package:westigov2/screens/map/facility_detail_screen.dart';
 import 'package:westigov2/utils/constants.dart';
 import 'package:westigov2/widgets/facility_marker.dart';
 import 'package:westigov2/widgets/facility_bottom_sheet.dart';
@@ -77,9 +78,14 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                             builder: (context) => FacilityBottomSheet(
                               facility: facility,
                               onViewSpaces: () {
-                                Navigator.pop(context);
-                                print(
-                                    'View Spaces clicked for ${facility.name}');
+                                Navigator.pop(context); // Close sheet
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => FacilityDetailScreen(
+                                        facility: facility),
+                                  ),
+                                );
                               },
                             ),
                           );

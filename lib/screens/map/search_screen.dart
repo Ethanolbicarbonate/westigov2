@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:westigov2/models/facility.dart';
 import 'package:westigov2/providers/search_provider.dart';
+import 'package:westigov2/screens/map/facility_detail_screen.dart';
 import 'package:westigov2/utils/constants.dart';
+import 'package:westigov2/models/facility.dart'; // Import
+import 'package:westigov2/screens/map/facility_detail_screen.dart'; // Import
 
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
@@ -91,15 +95,15 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                         final result = results[index];
                         return ListTile(
                           leading: CircleAvatar(
-                            backgroundColor: result.type == 'Facility' 
-                                ? AppColors.primary.withOpacity(0.1) 
+                            backgroundColor: result.type == 'Facility'
+                                ? AppColors.primary.withOpacity(0.1)
                                 : Colors.orange.withOpacity(0.1),
                             child: Icon(
-                              result.type == 'Facility' 
-                                  ? Icons.business 
+                              result.type == 'Facility'
+                                  ? Icons.business
                                   : Icons.meeting_room,
-                              color: result.type == 'Facility' 
-                                  ? AppColors.primary 
+                              color: result.type == 'Facility'
+                                  ? AppColors.primary
                                   : Colors.orange,
                               size: 20,
                             ),
@@ -116,8 +120,18 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                             ),
                           ),
                           onTap: () {
-                            // TODO: Navigate to Detail View
-                            print('Selected: ${result.name} (${result.type})');
+                            if (result.type == 'Facility') {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => FacilityDetailScreen(
+                                    facility: result.originalObject as Facility,
+                                  ),
+                                ),
+                              );
+                            } else {
+                              // TODO: Handle Space tap
+                            }
                           },
                         );
                       },
