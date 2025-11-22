@@ -1,34 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:westigov2/providers/auth_provider.dart';
+import 'package:westigov2/screens/home_screen.dart';
 import 'package:westigov2/utils/constants.dart';
+import 'package:westigov2/utils/helpers.dart';
 import 'package:westigov2/utils/validators.dart';
 import 'package:westigov2/widgets/password_strength_indicator.dart';
 
-class SignupScreen extends StatefulWidget {
+class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({super.key});
 
   @override
-  State<SignupScreen> createState() => _SignupScreenState();
+  ConsumerState<SignupScreen> createState() => _SignupScreenState();
 }
 
-class _SignupScreenState extends State<SignupScreen> {
+class _SignupScreenState extends ConsumerState<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
   
-  // Controllers
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   
-  // Dropdown values
   String? _selectedCourse;
   String? _selectedYearLevel;
   
-  // Visibility Toggles
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
-  // Dropdown Options
   final List<String> _courses = [
     'CICT', 'COE', 'CBM', 'CAS', 'COED', 'CPAG', 'CN', 'PESCAR', 'COM', 'COD', 'COL'
   ];
@@ -47,8 +47,53 @@ class _SignupScreenState extends State<SignupScreen> {
     super.dispose();
   }
 
+  Future<void> _handleSignup() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    // Set loading
+    ref.read(authLoadingProvider.notifier).state = true;
+
+    try {
+      final authService = ref.read(authServiceProvider);
+      
+      // Prepare extra data for the 'users' table
+      final userData = {
+        'first_name': _firstNameController.text.trim(),
+        'last_name': _lastNameController.text.trim(),
+        'course': _selectedCourse,
+        'year_level': _selectedYearLevel,
+      };
+
+      final response = await authService.signUp(
+        _emailController.text.trim(),
+        _passwordController.text,
+        userData,
+      );
+
+      if (!mounted) return;
+
+      if (response.success) {
+        // Success -> Navigate to Home
+        // (In real app, maybe go to "Check your email" screen if email confirmation is on)
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          (route) => false, // Remove all previous routes
+        );
+        AppHelpers.showSuccessSnackbar(context, 'Account created successfully!');
+      } else {
+        AppHelpers.showErrorSnackbar(context, response.error ?? 'Signup failed');
+      }
+    } catch (e) {
+      if (mounted) AppHelpers.showErrorSnackbar(context, 'An unexpected error occurred');
+    } finally {
+      if (mounted) ref.read(authLoadingProvider.notifier).state = false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isLoading = ref.watch(authLoadingProvider);
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -56,7 +101,7 @@ class _SignupScreenState extends State<SignupScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.textDark),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: isLoading ? null : () => Navigator.of(context).pop(),
         ),
       ),
       body: SafeArea(
@@ -84,12 +129,13 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                   const SizedBox(height: 32),
 
-                  // Name Fields Row
+                  // Name Fields
                   Row(
                     children: [
                       Expanded(
                         child: TextFormField(
                           controller: _firstNameController,
+                          enabled: !isLoading,
                           textCapitalization: TextCapitalization.words,
                           decoration: const InputDecoration(
                             labelText: 'First Name',
@@ -102,6 +148,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       Expanded(
                         child: TextFormField(
                           controller: _lastNameController,
+                          enabled: !isLoading,
                           textCapitalization: TextCapitalization.words,
                           decoration: const InputDecoration(
                             labelText: 'Last Name',
@@ -114,9 +161,9 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Course Dropdown
+                  // Course
                   DropdownButtonFormField<String>(
-                    initialValue: _selectedCourse,
+                    value: _selectedCourse,
                     decoration: const InputDecoration(
                       labelText: 'Course/College',
                       border: OutlineInputBorder(),
@@ -124,14 +171,14 @@ class _SignupScreenState extends State<SignupScreen> {
                     items: _courses.map((course) {
                       return DropdownMenuItem(value: course, child: Text(course));
                     }).toList(),
-                    onChanged: (val) => setState(() => _selectedCourse = val),
+                    onChanged: isLoading ? null : (val) => setState(() => _selectedCourse = val),
                     validator: (val) => val == null ? 'Please select a course' : null,
                   ),
                   const SizedBox(height: 16),
 
-                  // Year Level Dropdown
+                  // Year Level
                   DropdownButtonFormField<String>(
-                    initialValue: _selectedYearLevel,
+                    value: _selectedYearLevel,
                     decoration: const InputDecoration(
                       labelText: 'Year Level',
                       border: OutlineInputBorder(),
@@ -139,7 +186,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     items: _yearLevels.map((year) {
                       return DropdownMenuItem(value: year, child: Text(year));
                     }).toList(),
-                    onChanged: (val) => setState(() => _selectedYearLevel = val),
+                    onChanged: isLoading ? null : (val) => setState(() => _selectedYearLevel = val),
                     validator: (val) => val == null ? 'Please select a year level' : null,
                   ),
                   const SizedBox(height: 16),
@@ -147,6 +194,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   // Email
                   TextFormField(
                     controller: _emailController,
+                    enabled: !isLoading,
                     keyboardType: TextInputType.emailAddress,
                     decoration: const InputDecoration(
                       labelText: 'Email Address',
@@ -160,8 +208,9 @@ class _SignupScreenState extends State<SignupScreen> {
                   // Password
                   TextFormField(
                     controller: _passwordController,
+                    enabled: !isLoading,
                     obscureText: _obscurePassword,
-                    onChanged: (val) => setState(() {}), // Trigger rebuild for strength indicator
+                    onChanged: (val) => setState(() {}),
                     decoration: InputDecoration(
                       labelText: 'Password',
                       prefixIcon: const Icon(Icons.lock_outline),
@@ -170,7 +219,6 @@ class _SignupScreenState extends State<SignupScreen> {
                         onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                       ),
                       border: const OutlineInputBorder(),
-                      // Removed helperText to use our custom indicator
                     ),
                     validator: Validators.validatePassword,
                   ),
@@ -180,6 +228,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   // Confirm Password
                   TextFormField(
                     controller: _confirmPasswordController,
+                    enabled: !isLoading,
                     obscureText: _obscureConfirmPassword,
                     decoration: InputDecoration(
                       labelText: 'Retype Password',
@@ -199,12 +248,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
                   // Sign Up Button
                   ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        // TODO: Call signup
-                        print('Signup Valid');
-                      }
-                    },
+                    onPressed: isLoading ? null : _handleSignup,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
@@ -213,10 +257,16 @@ class _SignupScreenState extends State<SignupScreen> {
                         borderRadius: BorderRadius.circular(AppSizes.radiusM),
                       ),
                     ),
-                    child: const Text(
-                      'Create Account',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
+                    child: isLoading
+                      ? const SizedBox(
+                          height: 20, 
+                          width: 20, 
+                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
+                        )
+                      : const Text(
+                          'Create Account',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
                   ),
                 ],
               ),
