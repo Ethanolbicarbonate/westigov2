@@ -5,6 +5,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:westigov2/providers/facility_provider.dart'; // Import Provider
 import 'package:westigov2/utils/constants.dart';
 import 'package:westigov2/widgets/facility_marker.dart';
+import 'package:westigov2/widgets/facility_bottom_sheet.dart';
 
 // Change to ConsumerStatefulWidget
 class MapScreen extends ConsumerStatefulWidget {
@@ -65,8 +66,20 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                   height: 30,
                   child: FacilityMarker(
                     onTap: () {
-                      // We will implement the bottom sheet in the next sub-phase
-                      print('Tapped on ${facility.name}');
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled:
+                            true, // Allows sheet to be taller if needed
+                        backgroundColor: Colors.transparent,
+                        builder: (context) => FacilityBottomSheet(
+                          facility: facility,
+                          onViewSpaces: () {
+                            // TODO: Navigate to Full Facility Detail Screen
+                            Navigator.pop(context); // Close sheet for now
+                            print('View Spaces clicked for ${facility.name}');
+                          },
+                        ),
+                      );
                     },
                   ),
                 );
