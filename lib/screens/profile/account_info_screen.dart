@@ -30,7 +30,7 @@ class AccountInfoScreen extends ConsumerWidget {
             const Divider(),
             _buildInfoTile('User ID', user.id),
             const Divider(),
-            _buildInfoTile('Member Since', AppHelpers.formatDateTime(createdAt)),
+            _buildInfoTile('User Since', AppHelpers.formatDateTime(createdAt)),
             const Divider(),
             _buildInfoTile('Last Sign In', AppHelpers.formatDateTime(DateTime.parse(user.lastSignInAt ?? user.createdAt))),
           ],
