@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Import for Haptics
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:westigo/providers/event_filter_provider.dart';
 import 'package:westigo/utils/constants.dart';
@@ -35,7 +36,10 @@ class EventFilterSheet extends ConsumerWidget {
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               TextButton(
-                onPressed: () => notifier.clearAll(),
+                onPressed: () {
+                  HapticFeedback.mediumImpact(); // Haptic
+                  notifier.clearAll();
+                },
                 child: const Text('Clear All'),
               ),
             ],
@@ -61,7 +65,10 @@ class EventFilterSheet extends ConsumerWidget {
                       return FilterChip(
                         label: Text(year),
                         selected: isSelected,
-                        onSelected: (_) => notifier.toggleYear(year),
+                        onSelected: (_) {
+                          HapticFeedback.selectionClick(); // Haptic
+                          notifier.toggleYear(year);
+                        },
                         selectedColor: AppColors.primary.withValues(alpha: 0.2),
                         checkmarkColor: AppColors.primary,
                         labelStyle: TextStyle(
@@ -88,7 +95,10 @@ class EventFilterSheet extends ConsumerWidget {
                       return FilterChip(
                         label: Text(college),
                         selected: isSelected,
-                        onSelected: (_) => notifier.toggleCollege(college),
+                        onSelected: (_) {
+                          HapticFeedback.selectionClick(); // Haptic
+                          notifier.toggleCollege(college);
+                        },
                         selectedColor: Colors.green.withValues(alpha: 0.2),
                         checkmarkColor: Colors.green,
                         labelStyle: TextStyle(
@@ -108,6 +118,7 @@ class EventFilterSheet extends ConsumerWidget {
           // Apply Button
           ElevatedButton(
             onPressed: () {
+              HapticFeedback.lightImpact(); // Haptic
               Navigator.pop(context); // Close sheet
               // Logic is reactive, so UI updates automatically
             },

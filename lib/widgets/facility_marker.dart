@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Import for Haptics
 import 'package:westigo/utils/constants.dart';
 
 class FacilityMarker extends StatelessWidget {
@@ -9,7 +10,10 @@ class FacilityMarker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        HapticFeedback.selectionClick(); // Haptic Feedback
+        onTap();
+      },
       child: Column(
         children: [
           Container(

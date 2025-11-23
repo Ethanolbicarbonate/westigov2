@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Import for Haptics
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:westigo/providers/home_provider.dart';
 import 'package:westigo/screens/events/events_screen.dart';
@@ -37,6 +38,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentIndex,
         onTap: (index) {
+          // Haptic Feedback
+          if (currentIndex != index) {
+             HapticFeedback.selectionClick();
+          }
           // Update provider
           ref.read(homeTabProvider.notifier).state = index;
         },
