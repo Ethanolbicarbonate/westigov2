@@ -7,14 +7,28 @@ import 'package:westigo/utils/page_transitions.dart';
 import 'package:westigo/screens/map/space_detail_screen.dart';
 import 'package:westigo/widgets/favorite_button.dart';
 
-class FacilityDetailScreen extends ConsumerWidget {
+class FacilityDetailScreen extends ConsumerStatefulWidget {
   final Facility facility;
 
   const FacilityDetailScreen({super.key, required this.facility});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final spacesAsync = ref.watch(facilitySpacesProvider(facility.id));
+  ConsumerState<FacilityDetailScreen> createState() => _FacilityDetailScreenState();
+}
+
+class _FacilityDetailScreenState extends ConsumerState<FacilityDetailScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final spacesAsync = ref.watch(facilitySpacesProvider(widget.facility.id));
 
     return Scaffold(
       body: CustomScrollView(
@@ -25,14 +39,14 @@ class FacilityDetailScreen extends ConsumerWidget {
             pinned: true,
             backgroundColor: AppColors.primary,
             actions: [
-              FavoriteButton(type: 'facility', id: facility.id),
+              FavoriteButton(type: 'facility', id: widget.facility.id),
             ],
             iconTheme: const IconThemeData(color: Colors.white),
             flexibleSpace: FlexibleSpaceBar(
-              titlePadding: const EdgeInsets.only(left: 16, bottom: 16, right: 16), // Better placement
-              centerTitle: false, // Left align looks more modern/readable with large text
+              titlePadding: const EdgeInsets.only(left: 16, bottom: 16, right: 16),
+              centerTitle: false,
               title: Text(
-                facility.name,
+                widget.facility.name,
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 20,
@@ -47,16 +61,15 @@ class FacilityDetailScreen extends ConsumerWidget {
                 ),
               ),
               background: Hero(
-                tag: 'facility-img-${facility.id}',
-                child: facility.photoUrl != null
+                tag: 'facility-img-${widget.facility.id}',
+                child: widget.facility.photoUrl != null
                     ? Stack(
                         fit: StackFit.expand,
                         children: [
                           Image.network(
-                            facility.photoUrl!,
+                            widget.facility.photoUrl!,
                             fit: BoxFit.cover,
                           ),
-                          // Gradient overlay for better text readability
                           const DecoratedBox(
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
@@ -74,14 +87,13 @@ class FacilityDetailScreen extends ConsumerWidget {
             ),
           ),
           
-          // ... Rest of existing content ...
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(AppSizes.paddingL),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (facility.description != null) ...[
+                  if (widget.facility.description != null) ...[
                     Text(
                       'About',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -90,7 +102,7 @@ class FacilityDetailScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      facility.description!,
+                      widget.facility.description!,
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     const SizedBox(height: 24),
@@ -101,6 +113,28 @@ class FacilityDetailScreen extends ConsumerWidget {
                           fontWeight: FontWeight.bold,
                         ),
                   ),
+                  const SizedBox(height: 12),
+                  
+                  // Search Bar
+                  TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Search rooms...',
+                      prefixIcon: const Icon(Icons.search),
+                      filled: true,
+                      fillColor: Colors.grey.shade100,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        _searchQuery = value.toLowerCase();
+                      });
+                    },
+                  ),
                   const SizedBox(height: 8),
                 ],
               ),
@@ -109,18 +143,24 @@ class FacilityDetailScreen extends ConsumerWidget {
 
           spacesAsync.when(
             data: (spaces) {
-              if (spaces.isEmpty) {
+              // Local Filtering Logic
+              final filteredSpaces = spaces.where((space) {
+                return space.name.toLowerCase().contains(_searchQuery);
+              }).toList();
+
+              if (filteredSpaces.isEmpty) {
                 return const SliverToBoxAdapter(
                   child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: AppSizes.paddingL),
-                    child: Text('No spaces listed for this facility.'),
+                    padding: EdgeInsets.symmetric(horizontal: AppSizes.paddingL, vertical: 20),
+                    child: Center(child: Text('No spaces found matching your search.')),
                   ),
                 );
               }
+              
               return SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
-                    final space = spaces[index];
+                    final space = filteredSpaces[index];
                     return ListTile(
                       leading: const Icon(Icons.meeting_room, color: Colors.grey),
                       title: Text(space.name),
@@ -134,14 +174,14 @@ class FacilityDetailScreen extends ConsumerWidget {
                           MaterialPageRoute(
                             builder: (context) => SpaceDetailScreen(
                               space: space,
-                              parentFacilityName: facility.name,
+                              parentFacilityName: widget.facility.name,
                             ),
                           ),
                         );
                       },
                     );
                   },
-                  childCount: spaces.length,
+                  childCount: filteredSpaces.length,
                 ),
               );
             },

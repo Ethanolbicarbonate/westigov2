@@ -51,6 +51,7 @@ class EventDetailScreen extends ConsumerWidget {
             expandedHeight: 250.0,
             floating: false,
             pinned: true,
+            iconTheme: const IconThemeData(color: Colors.white), // Force white back arrow
             actions: [
               FavoriteButton(type: 'event', id: event.id),
             ],
@@ -88,11 +89,10 @@ class EventDetailScreen extends ConsumerWidget {
                       AppHelpers.formatDateTime(event.startDate)),
                   const SizedBox(height: 12),
 
-                  // UPDATED LOCATION ROW
                   if (event.locationId != null)
                     _buildInfoRow(
                       Icons.location_on,
-                      event.locationName ?? 'View Location Details', // Use Name
+                      event.locationName ?? 'View Location Details',
                       isLink: true,
                       onTap: () => _handleLocationTap(context, ref),
                     ),
@@ -168,9 +168,8 @@ class EventDetailScreen extends ConsumerWidget {
               text,
               style: TextStyle(
                 fontSize: 16,
-                fontWeight: FontWeight.w600, // Bold
-                color: isLink ? AppColors.primary : AppColors.textDark, // Blue if link
-                // Removed textDecoration: underline
+                fontWeight: FontWeight.w600,
+                color: isLink ? AppColors.primary : AppColors.textDark,
               ),
             ),
           ),
