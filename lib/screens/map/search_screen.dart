@@ -4,8 +4,9 @@ import 'package:westigo/models/facility.dart';
 import 'package:westigo/providers/search_provider.dart';
 import 'package:westigo/screens/map/facility_detail_screen.dart';
 import 'package:westigo/utils/constants.dart';
-import 'package:westigo/models/space.dart'; // Import
-import 'package:westigo/screens/map/space_detail_screen.dart'; // Import
+import 'package:westigo/models/space.dart';
+import 'package:westigo/screens/map/space_detail_screen.dart';
+import 'package:westigo/widgets/empty_state_widget.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
@@ -88,7 +89,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             // 2. Results List
             Expanded(
               child: results.isEmpty && _searchController.text.isNotEmpty
-                  ? const Center(child: Text('No results found'))
+                  ? const EmptyStateWidget(
+                      icon: Icons.search_off,
+                      title: 'No results found',
+                      subtitle:
+                          'Try adjusting your search terms or look for a different facility.',
+                    )
                   : ListView.builder(
                       itemCount: results.length,
                       itemBuilder: (context, index) {

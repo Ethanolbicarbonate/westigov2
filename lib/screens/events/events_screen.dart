@@ -7,6 +7,8 @@ import 'package:westigo/screens/events/event_detail_screen.dart';
 import 'package:westigo/widgets/event_filter_sheet.dart';
 import 'package:westigo/providers/event_filter_provider.dart';
 import 'package:westigo/widgets/event_card_skeleton.dart';
+import 'package:westigo/utils/page_transitions.dart';
+import 'package:westigo/widgets/empty_state_widget.dart';
 
 class EventsScreen extends ConsumerStatefulWidget {
   const EventsScreen({super.key});
@@ -85,36 +87,13 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
       body: eventsAsync.when(
         data: (events) {
           if (events.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.event_busy,
-                        size: 64, color: AppColors.primary),
-                  ),
-                  const SizedBox(height: 24),
-                  const Text(
-                    'No upcoming events',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Check back later for campus updates',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                  const SizedBox(height: 24),
-                  OutlinedButton(
-                    onPressed: () => ref.refresh(eventsProvider),
-                    child: const Text('Refresh'),
-                  ),
-                ],
-              ),
+            return EmptyStateWidget(
+              icon: Icons.event_note,
+              title: 'No events found',
+              subtitle:
+                  'There are no upcoming events matching your criteria. Check back later!',
+              actionLabel: 'Refresh',
+              onAction: () => ref.refresh(eventsProvider),
             );
           }
 
@@ -131,8 +110,9 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) => EventDetailScreen(event: event),
+                      SlideUpRoute(
+                        // Use SlideUpRoute
+                        page: EventDetailScreen(event: event),
                       ),
                     );
                   },

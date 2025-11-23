@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:westigo/models/event.dart';
 import 'package:westigo/utils/constants.dart';
-import 'package:westigo/utils/helpers.dart';
 import 'package:westigo/widgets/favorite_button.dart';
 
 class EventCard extends StatelessWidget {
@@ -17,14 +16,13 @@ class EventCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Parse date parts
     final month = DateFormat('MMM').format(event.startDate).toUpperCase();
     final day = DateFormat('d').format(event.startDate);
 
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.only(bottom: 4), // Tiny margin for shadow separation
+        margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(AppSizes.radiusM),
@@ -42,7 +40,6 @@ class EventCard extends StatelessWidget {
             // 1. Image Area
             Stack(
               children: [
-                // Hero Image
                 ClipRRect(
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(AppSizes.radiusM)),
                   child: Hero(
@@ -60,8 +57,7 @@ class EventCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                
-                // Gradient Overlay (Bottom of image)
+                // Gradient
                 Positioned(
                   bottom: 0,
                   left: 0,
@@ -80,8 +76,7 @@ class EventCard extends StatelessWidget {
                     ),
                   ),
                 ),
-
-                // Date Badge (Top Left)
+                // Date Badge
                 Positioned(
                   top: 12,
                   left: 12,
@@ -94,29 +89,13 @@ class EventCard extends StatelessWidget {
                     ),
                     child: Column(
                       children: [
-                        Text(
-                          month,
-                          style: const TextStyle(
-                            color: Colors.red,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          day,
-                          style: const TextStyle(
-                            color: Colors.black87,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            height: 1.0,
-                          ),
-                        ),
+                        Text(month, style: const TextStyle(color: Colors.red, fontSize: 10, fontWeight: FontWeight.bold)),
+                        Text(day, style: const TextStyle(color: Colors.black87, fontSize: 18, fontWeight: FontWeight.bold, height: 1.0)),
                       ],
                     ),
                   ),
                 ),
-
-                // Favorite Button (Top Right) - Reused
+                // Favorite
                 Positioned(
                   top: 8,
                   right: 8,
@@ -137,20 +116,15 @@ class EventCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Title
                   Text(
                     event.name,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                      height: 1.2,
-                    ),
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, height: 1.2),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 8),
 
-                  // Location & Time Row
+                  // UPDATED LOCATION ROW
                   Row(
                     children: [
                       const Icon(Icons.access_time, size: 14, color: Colors.grey),
@@ -159,16 +133,23 @@ class EventCard extends StatelessWidget {
                         DateFormat('h:mm a').format(event.startDate),
                         style: const TextStyle(color: Colors.grey, fontSize: 12),
                       ),
-                      const SizedBox(width: 16),
-                      // Optional Location if available
-                      const Icon(Icons.location_on, size: 14, color: Colors.grey),
-                      // ...
+                      if (event.locationName != null) ...[
+                        const SizedBox(width: 12),
+                        const Icon(Icons.location_on, size: 14, color: Colors.grey),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            event.locationName!,
+                            style: const TextStyle(color: Colors.grey, fontSize: 12),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ]
                     ],
                   ),
                   
                   const SizedBox(height: 12),
-
-                  // Audience Tags
                   Wrap(
                     spacing: 6,
                     runSpacing: 4,
@@ -182,41 +163,26 @@ class EventCard extends StatelessWidget {
       ),
     );
   }
+
   Widget _buildPlaceholder() {
     return Container(
       color: Colors.grey[200],
-      child: const Center(
-        child: Icon(Icons.event, color: Colors.grey, size: 40),
-      ),
+      child: const Center(child: Icon(Icons.event, color: Colors.grey, size: 40)),
     );
   }
 
   Widget _buildTag(String text) {
+    // ... existing tag logic ...
     Color bg = Colors.grey.shade200;
     Color fg = Colors.grey.shade800;
-
-    if (text == 'All Students') {
-      bg = Colors.blueGrey.shade100;
-      fg = Colors.blueGrey.shade800;
-    } else if (text.contains('year')) {
-      bg = Colors.blue.shade100;
-      fg = Colors.blue.shade800;
-    } else {
-      // Colleges (CICT, etc.)
-      bg = Colors.green.shade100;
-      fg = Colors.green.shade800;
-    }
+    if (text == 'All Students') { bg = Colors.blueGrey.shade100; fg = Colors.blueGrey.shade800; }
+    else if (text.contains('year')) { bg = Colors.blue.shade100; fg = Colors.blue.shade800; }
+    else { bg = Colors.green.shade100; fg = Colors.green.shade800; }
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(color: fg, fontSize: 10, fontWeight: FontWeight.bold),
-      ),
+      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(4)),
+      child: Text(text, style: TextStyle(color: fg, fontSize: 10, fontWeight: FontWeight.bold)),
     );
   }
 }

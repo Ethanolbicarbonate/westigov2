@@ -13,18 +13,10 @@ class EventDetailScreen extends ConsumerWidget {
   const EventDetailScreen({super.key, required this.event});
 
   Future<void> _handleLocationTap(BuildContext context, WidgetRef ref) async {
-    if (event.locationId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No location specified for this event')),
-      );
-      return;
-    }
+    if (event.locationId == null) return;
 
     try {
-      // Fetch the space details using the service provider
       final spaceService = ref.read(spaceServiceProvider);
-
-      // Note: Ensure your SpaceService has a getSpaceById method implemented
       final space = await spaceService.getSpaceById(event.locationId!);
 
       if (context.mounted) {
@@ -32,10 +24,7 @@ class EventDetailScreen extends ConsumerWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => SpaceDetailScreen(
-                space: space,
-                // If you have parent/building info, pass it here, otherwise default is fine
-              ),
+              builder: (context) => SpaceDetailScreen(space: space),
             ),
           );
         } else {
@@ -58,7 +47,6 @@ class EventDetailScreen extends ConsumerWidget {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          // 1. Hero Image App Bar
           SliverAppBar(
             expandedHeight: 250.0,
             floating: false,
@@ -81,14 +69,12 @@ class EventDetailScreen extends ConsumerWidget {
             ),
           ),
 
-          // 2. Content
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(AppSizes.paddingL),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Title
                   Text(
                     event.name,
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
@@ -98,24 +84,23 @@ class EventDetailScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 16),
 
-                  // Info Row (Date & Time)
                   _buildInfoRow(Icons.calendar_today,
                       AppHelpers.formatDateTime(event.startDate)),
                   const SizedBox(height: 12),
 
-                  // Info Row (Location)
-                  _buildInfoRow(
-                    Icons.location_on,
-                    'Tap to view location',
-                    isLink: true,
-                    onTap: () => _handleLocationTap(context, ref),
-                  ),
+                  // UPDATED LOCATION ROW
+                  if (event.locationId != null)
+                    _buildInfoRow(
+                      Icons.location_on,
+                      event.locationName ?? 'View Location Details', // Use Name
+                      isLink: true,
+                      onTap: () => _handleLocationTap(context, ref),
+                    ),
 
                   const SizedBox(height: 24),
                   const Divider(),
                   const SizedBox(height: 24),
 
-                  // Description
                   if (event.description != null) ...[
                     Text(
                       'About this Event',
@@ -134,7 +119,6 @@ class EventDetailScreen extends ConsumerWidget {
                     const SizedBox(height: 24),
                   ],
 
-                  // Audience Scopes
                   Text(
                     'Who should attend?',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
@@ -154,8 +138,6 @@ class EventDetailScreen extends ConsumerWidget {
                             ))
                         .toList(),
                   ),
-
-                  // Bottom Padding
                   const SizedBox(height: 40),
                 ],
               ),
@@ -186,12 +168,14 @@ class EventDetailScreen extends ConsumerWidget {
               text,
               style: TextStyle(
                 fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: isLink ? AppColors.primary : AppColors.textDark,
-                decoration: isLink ? TextDecoration.underline : null,
+                fontWeight: FontWeight.w600, // Bold
+                color: isLink ? AppColors.primary : AppColors.textDark, // Blue if link
+                // Removed textDecoration: underline
               ),
             ),
           ),
+          if (isLink)
+            const Icon(Icons.arrow_forward_ios, size: 14, color: AppColors.primary),
         ],
       ),
     );

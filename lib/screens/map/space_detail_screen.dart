@@ -9,7 +9,6 @@ import 'package:westigo/widgets/favorite_button.dart';
 
 class SpaceDetailScreen extends ConsumerStatefulWidget {
   final Space space;
-  // We keep this as an optional initial value to show while loading
   final String? parentFacilityName; 
 
   const SpaceDetailScreen({
@@ -65,7 +64,6 @@ class _SpaceDetailScreenState extends ConsumerState<SpaceDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Determine what text to show for location
     String locationText = 'Loading...';
     if (_parentFacility != null) {
       locationText = _parentFacility!.name;
@@ -75,14 +73,13 @@ class _SpaceDetailScreenState extends ConsumerState<SpaceDetailScreen> {
       locationText = 'Unknown Facility';
     }
 
-    // Determine if it should look like a link
     final isLink = _parentFacility != null;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.space.name),
+        title: Text(widget.space.name, style: const TextStyle(color: Colors.white)), // Force White
         backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+        iconTheme: const IconThemeData(color: Colors.white), // Force Back Button White
         actions: [
           FavoriteButton(type: 'space', id: widget.space.id),
         ],
@@ -92,7 +89,6 @@ class _SpaceDetailScreenState extends ConsumerState<SpaceDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Photo
             if (widget.space.photoUrl != null)
               ClipRRect(
                 borderRadius: BorderRadius.circular(AppSizes.radiusM),
@@ -108,7 +104,6 @@ class _SpaceDetailScreenState extends ConsumerState<SpaceDetailScreen> {
             
             const SizedBox(height: 24),
 
-            // Info Card
             Container(
               padding: const EdgeInsets.all(AppSizes.paddingM),
               decoration: BoxDecoration(
@@ -140,7 +135,6 @@ class _SpaceDetailScreenState extends ConsumerState<SpaceDetailScreen> {
 
             const SizedBox(height: 24),
 
-            // Description
             if (widget.space.description != null) ...[
               Text(
                 'About',
@@ -169,20 +163,25 @@ class _SpaceDetailScreenState extends ConsumerState<SpaceDetailScreen> {
           children: [
             Icon(icon, color: AppColors.primary, size: 20),
             const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
-                Text(
-                  value, 
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: isLink ? AppColors.primary : Colors.black,
-                    decoration: isLink ? TextDecoration.underline : null,
+            Expanded( // Added Expanded to prevent overflow
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                  Text(
+                    value, 
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                      // No underline, just color
+                      color: isLink ? AppColors.primary : Colors.black87,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
+            if (isLink) 
+              const Icon(Icons.arrow_forward_ios, size: 14, color: AppColors.primary),
           ],
         ),
       ),

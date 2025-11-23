@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:westigo/models/facility.dart';
 import 'package:westigo/providers/facility_provider.dart';
 import 'package:westigo/utils/constants.dart';
+import 'package:westigo/utils/page_transitions.dart';
 import 'package:westigo/screens/map/space_detail_screen.dart';
 import 'package:westigo/widgets/favorite_button.dart';
 
@@ -13,47 +14,73 @@ class FacilityDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Fetch spaces for this facility
     final spacesAsync = ref.watch(facilitySpacesProvider(facility.id));
 
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          // 1. App Bar with Image
           SliverAppBar(
-            expandedHeight: 200.0,
+            expandedHeight: 250.0,
             floating: false,
             pinned: true,
+            backgroundColor: AppColors.primary,
             actions: [
               FavoriteButton(type: 'facility', id: facility.id),
             ],
+            iconTheme: const IconThemeData(color: Colors.white),
             flexibleSpace: FlexibleSpaceBar(
+              titlePadding: const EdgeInsets.only(left: 16, bottom: 16, right: 16), // Better placement
+              centerTitle: false, // Left align looks more modern/readable with large text
               title: Text(
                 facility.name,
                 style: const TextStyle(
                   color: Colors.white,
-                  shadows: [Shadow(color: Colors.black, blurRadius: 10)],
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  shadows: [
+                    Shadow(
+                      offset: Offset(0, 1),
+                      blurRadius: 3.0,
+                      color: Colors.black54,
+                    ),
+                  ],
                 ),
               ),
-              background: facility.photoUrl != null
-                  ? Image.network(
-                      facility.photoUrl!,
-                      fit: BoxFit.cover,
-                      color: Colors.black.withValues(alpha: 0.3),
-                      colorBlendMode: BlendMode.darken,
-                    )
-                  : Container(color: AppColors.primary),
+              background: Hero(
+                tag: 'facility-img-${facility.id}',
+                child: facility.photoUrl != null
+                    ? Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          Image.network(
+                            facility.photoUrl!,
+                            fit: BoxFit.cover,
+                          ),
+                          // Gradient overlay for better text readability
+                          const DecoratedBox(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [Colors.transparent, Colors.black54],
+                                stops: [0.6, 1.0],
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                    : Container(color: AppColors.primary),
+              ),
             ),
           ),
-
-          // 2. Content
+          
+          // ... Rest of existing content ...
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(AppSizes.paddingL),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Description
                   if (facility.description != null) ...[
                     Text(
                       'About',
@@ -68,8 +95,6 @@ class FacilityDetailScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 24),
                   ],
-
-                  // Spaces Header
                   Text(
                     'Rooms & Spaces',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -82,14 +107,12 @@ class FacilityDetailScreen extends ConsumerWidget {
             ),
           ),
 
-          // 3. Spaces List
           spacesAsync.when(
             data: (spaces) {
               if (spaces.isEmpty) {
                 return const SliverToBoxAdapter(
                   child: Padding(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: AppSizes.paddingL),
+                    padding: EdgeInsets.symmetric(horizontal: AppSizes.paddingL),
                     child: Text('No spaces listed for this facility.'),
                   ),
                 );
@@ -99,8 +122,7 @@ class FacilityDetailScreen extends ConsumerWidget {
                   (context, index) {
                     final space = spaces[index];
                     return ListTile(
-                      leading:
-                          const Icon(Icons.meeting_room, color: Colors.grey),
+                      leading: const Icon(Icons.meeting_room, color: Colors.grey),
                       title: Text(space.name),
                       subtitle: space.floorLevel != null
                           ? Text(space.floorLevel!)
@@ -112,8 +134,7 @@ class FacilityDetailScreen extends ConsumerWidget {
                           MaterialPageRoute(
                             builder: (context) => SpaceDetailScreen(
                               space: space,
-                              parentFacilityName:
-                                  facility.name, // We know the parent here!
+                              parentFacilityName: facility.name,
                             ),
                           ),
                         );
@@ -135,8 +156,6 @@ class FacilityDetailScreen extends ConsumerWidget {
               ),
             ),
           ),
-
-          // Bottom Padding
           const SliverToBoxAdapter(child: SizedBox(height: 40)),
         ],
       ),

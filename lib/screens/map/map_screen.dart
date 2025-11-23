@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart'; // Import Riverpod
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:westigo/providers/facility_provider.dart'; // Import Provider
+import 'package:westigo/providers/facility_provider.dart';
 import 'package:westigo/screens/map/facility_detail_screen.dart';
 import 'package:westigo/utils/constants.dart';
+import 'package:westigo/utils/page_transitions.dart'; // Import this!
 import 'package:westigo/widgets/facility_marker.dart';
 import 'package:westigo/widgets/facility_bottom_sheet.dart';
 import 'package:westigo/widgets/map_search_bar.dart';
@@ -12,7 +13,6 @@ import 'package:westigo/providers/search_provider.dart';
 import 'package:westigo/screens/map/search_screen.dart';
 import 'package:westigo/widgets/map_recenter_button.dart';
 
-// Change to ConsumerStatefulWidget
 class MapScreen extends ConsumerStatefulWidget {
   const MapScreen({super.key});
 
@@ -21,7 +21,6 @@ class MapScreen extends ConsumerStatefulWidget {
 }
 
 class _MapScreenState extends ConsumerState<MapScreen> {
-  // Use your custom coordinates here
   static const LatLng _wvsuCenter = LatLng(10.712805, 122.562543);
   final MapController _mapController = MapController();
 
@@ -61,8 +60,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                 userAgentPackageName: 'com.wvsu.westigo',
                 subdomains: const ['a', 'b', 'c'],
               ),
-
-              /// Marker Layer (Based on AsyncValue)
               facilitiesAsyncValue.when(
                 data: (facilities) => MarkerLayer(
                   markers: facilities.map((facility) {
@@ -80,11 +77,11 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                               facility: facility,
                               onViewSpaces: () {
                                 Navigator.pop(context); // Close sheet
+                                // USE SLIDE UP ROUTE HERE
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(
-                                    builder: (context) => FacilityDetailScreen(
-                                        facility: facility),
+                                  SlideUpRoute(
+                                    page: FacilityDetailScreen(facility: facility),
                                   ),
                                 );
                               },
@@ -97,28 +94,18 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                 ),
                 loading: () => const MarkerLayer(markers: []),
                 error: (err, stack) {
-                  // Only show snackbar once
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Failed to load map pins: $err')),
-                    );
-                  });
                   return const MarkerLayer(markers: []);
                 },
               ),
-
               const RichAttributionWidget(
                 attributions: [
-                  TextSourceAttribution(
-                    'OpenStreetMap contributors',
-                    onTap: null,
-                  ),
+                  TextSourceAttribution('OpenStreetMap contributors', onTap: null),
                 ],
               ),
             ],
           ),
           Positioned(
-            top: MediaQuery.of(context).padding.top + 16, // Below logout button
+            top: MediaQuery.of(context).padding.top + 16,
             right: 16,
             child: MapRecenterButton(
               onPressed: () {
@@ -132,19 +119,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             bottom: MediaQuery.of(context).padding.bottom + 16,
             child: MapSearchBar(
               onTap: () {
-                // Ensure spaces are loaded
                 ref.read(allSpacesProvider);
-
+                // USE FADE ROUTE HERE
                 Navigator.of(context).push(
-                  PageRouteBuilder(
-                    pageBuilder: (context, animation, secondaryAnimation) =>
-                        const SearchScreen(),
-                    transitionsBuilder:
-                        (context, animation, secondaryAnimation, child) {
-                      // Fade transition
-                      return FadeTransition(opacity: animation, child: child);
-                    },
-                  ),
+                  FadeRoute(page: const SearchScreen()),
                 );
               },
             ),

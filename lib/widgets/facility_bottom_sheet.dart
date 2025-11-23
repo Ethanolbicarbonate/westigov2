@@ -28,10 +28,10 @@ class FacilityBottomSheet extends StatelessWidget {
         ],
       ),
       child: Column(
-        mainAxisSize: MainAxisSize.min, // Shrink to fit content
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Handle bar (visual cue for dragging)
+          // Handle bar
           Center(
             child: Container(
               width: 40,
@@ -44,7 +44,6 @@ class FacilityBottomSheet extends StatelessWidget {
             ),
           ),
           
-          // Facility Name
           Text(
             facility.name,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -54,28 +53,30 @@ class FacilityBottomSheet extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           
-          // Photo
+          // Photo with Hero
           if (facility.photoUrl != null)
-            ClipRRect(
-              borderRadius: BorderRadius.circular(AppSizes.radiusM),
-              child: Image.network(
-                facility.photoUrl!,
-                height: 150,
-                width: double.infinity,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    height: 150,
-                    color: Colors.grey[200],
-                    child: const Center(child: Icon(Icons.image_not_supported)),
-                  );
-                },
+            Hero(
+              tag: 'facility-img-${facility.id}', // Unique tag
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(AppSizes.radiusM),
+                child: Image.network(
+                  facility.photoUrl!,
+                  height: 150,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      height: 150,
+                      color: Colors.grey[200],
+                      child: const Center(child: Icon(Icons.image_not_supported)),
+                    );
+                  },
+                ),
               ),
             ),
           
           const SizedBox(height: 12),
           
-          // Description
           if (facility.description != null)
             Text(
               facility.description!,
@@ -88,7 +89,6 @@ class FacilityBottomSheet extends StatelessWidget {
             
           const SizedBox(height: 24),
           
-          // Action Button
           ElevatedButton(
             onPressed: onViewSpaces,
             style: ElevatedButton.styleFrom(
@@ -102,7 +102,6 @@ class FacilityBottomSheet extends StatelessWidget {
             child: const Text('View Spaces & Details'),
           ),
           
-          // Extra padding for bottom safe area (iPhone home bar)
           SizedBox(height: MediaQuery.of(context).padding.bottom),
         ],
       ),

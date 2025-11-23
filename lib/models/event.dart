@@ -3,6 +3,7 @@ class Event {
   final String name;
   final String? description;
   final int? locationId;
+  final String? locationName; // Added field
   final DateTime startDate;
   final DateTime endDate;
   final String? imageUrl;
@@ -13,6 +14,7 @@ class Event {
     required this.name,
     this.description,
     this.locationId,
+    this.locationName, // Added to constructor
     required this.startDate,
     required this.endDate,
     this.imageUrl,
@@ -25,11 +27,11 @@ class Event {
       name: json['name'] as String,
       description: json['description'] as String?,
       locationId: json['location_id'] as int?,
-      // Supabase sends dates as ISO 8601 strings
+      // Parse nested Supabase data (e.g., spaces: { name: "Auditorium" })
+      locationName: json['spaces'] != null ? json['spaces']['name'] as String? : null,
       startDate: DateTime.parse(json['start_date'] as String),
       endDate: DateTime.parse(json['end_date'] as String),
       imageUrl: json['image_url'] as String?,
-      // Handle array from DB
       scopes: List<String>.from(json['scopes'] ?? []),
     );
   }
@@ -40,6 +42,7 @@ class Event {
       'name': name,
       'description': description,
       'location_id': locationId,
+      // locationName is read-only from DB joins usually
       'start_date': startDate.toIso8601String(),
       'end_date': endDate.toIso8601String(),
       'image_url': imageUrl,

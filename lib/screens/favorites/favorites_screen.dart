@@ -5,8 +5,9 @@ import 'package:westigo/providers/favorite_provider.dart';
 import 'package:westigo/widgets/favorite_space_card.dart';
 import 'package:westigo/screens/map/space_detail_screen.dart';
 import 'package:westigo/widgets/favorite_event_card.dart';
-import 'package:westigo/screens/events/event_detail_screen.dart'; // To navigate
-import 'package:westigo/providers/home_provider.dart'; // Import
+import 'package:westigo/screens/events/event_detail_screen.dart';
+import 'package:westigo/providers/home_provider.dart';
+import 'package:westigo/widgets/empty_state_widget.dart'; // Import
 
 class FavoritesScreen extends ConsumerStatefulWidget {
   const FavoritesScreen({super.key});
@@ -19,57 +20,9 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
-  Widget _buildEmptyState({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required String buttonText,
-    required VoidCallback onPressed,
-  }) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, size: 64, color: Colors.grey[400]),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              title,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              subtitle,
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.grey),
-            ),
-            const SizedBox(height: 24),
-            OutlinedButton(
-              onPressed: onPressed,
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.primary,
-                side: const BorderSide(color: AppColors.primary),
-              ),
-              child: Text(buttonText),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   @override
   void initState() {
     super.initState();
-    // Two tabs: Spaces and Events
     _tabController = TabController(length: 2, vsync: this);
   }
 
@@ -119,6 +72,7 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen>
       body: TabBarView(
         controller: _tabController,
         children: [
+          // Spaces Tab
           Consumer(
             builder: (context, ref, _) {
               final spacesAsync = ref.watch(favoriteSpacesListProvider);
@@ -126,19 +80,17 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen>
               return spacesAsync.when(
                 data: (spaces) {
                   if (spaces.isEmpty) {
-                    return _buildEmptyState(
-                      icon: Icons.star_border,
+                    return EmptyStateWidget(
+                      icon: Icons.bookmark_border,
                       title: 'No favorite spaces',
-                      subtitle:
-                          'Save rooms, labs, or buildings you visit often for quick access.',
-                      buttonText: 'Explore Map',
-                      onPressed: () {
+                      subtitle: 'Save rooms, labs, or buildings you visit often for quick access.',
+                      actionLabel: 'Explore Map',
+                      onAction: () {
                         ref.read(homeTabProvider.notifier).state = 0;
                       },
                     );
                   }
 
-                  // List of favorite spaces
                   return RefreshIndicator(
                     onRefresh: () =>
                         ref.refresh(favoriteSpacesListProvider.future),
@@ -168,7 +120,7 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen>
               );
             },
           ),
-          // Events
+          // Events Tab
           Consumer(
             builder: (context, ref, _) {
               final eventsAsync = ref.watch(favoriteEventsListProvider);
@@ -176,13 +128,12 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen>
               return eventsAsync.when(
                 data: (events) {
                   if (events.isEmpty) {
-                    return _buildEmptyState(
-                      icon: Icons.event_available,
+                    return EmptyStateWidget(
+                      icon: Icons.event_busy,
                       title: 'No favorite events',
-                      subtitle:
-                          'Don\'t miss out! Star events you are interested in attending.',
-                      buttonText: 'Browse Events',
-                      onPressed: () {
+                      subtitle: 'Don\'t miss out! Star events you are interested in attending.',
+                      actionLabel: 'Browse Events',
+                      onAction: () {
                         ref.read(homeTabProvider.notifier).state = 1;
                       },
                     );
