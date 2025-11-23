@@ -33,9 +33,17 @@ class _FacilityDetailScreenState extends ConsumerState<FacilityDetailScreen> {
   }
 
   void _shareFacility() {
+    // Use exact latitude and longitude to drop a pin
+    final lat = widget.facility.latitude;
+    final long = widget.facility.longitude;
+    final mapLink =
+        'https://www.google.com/maps/search/?api=1&query=$lat,$long';
+
     final text = 'Meet me at ${widget.facility.name}! 🏢\n\n'
-        'Here\'s the location on Westigo.';
-    Share.share(text);
+        'Here\'s the location:\nSent via Westigo.\n\n'
+        '$mapLink';
+
+    SharePlus.instance.share(ShareParams(text: text));
   }
 
   @override
@@ -51,7 +59,7 @@ class _FacilityDetailScreenState extends ConsumerState<FacilityDetailScreen> {
             pinned: true,
             backgroundColor: AppColors.primary,
             actions: [
-              // Share Button
+              // Add this IconButton
               IconButton(
                 icon: const Icon(Icons.share),
                 tooltip: 'Share Location',
@@ -129,7 +137,6 @@ class _FacilityDetailScreenState extends ConsumerState<FacilityDetailScreen> {
                         ),
                   ),
                   const SizedBox(height: 12),
-
                   TextField(
                     controller: _searchController,
                     decoration: InputDecoration(

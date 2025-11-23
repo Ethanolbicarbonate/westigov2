@@ -70,16 +70,27 @@ class _SpaceDetailScreenState extends ConsumerState<SpaceDetailScreen> {
       location += ' (${widget.space.floorLevel})';
     }
     
-    // Add facility context if available
     String contextMsg = '';
+    String mapLink = '';
+
+    // Use parent facility coordinates if available
     if (_parentFacility != null) {
       contextMsg = ' inside ${_parentFacility!.name}';
-    } else if (widget.parentFacilityName != null) {
-      contextMsg = ' inside ${widget.parentFacilityName}';
+      mapLink = 'https://www.google.com/maps/search/?api=1&query=${_parentFacility!.latitude},${_parentFacility!.longitude}';
+    } else {
+       if (widget.parentFacilityName != null) {
+         contextMsg = ' inside ${widget.parentFacilityName}';
+         // Fallback to search query if no coords yet
+         mapLink = 'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent("West Visayas State University ${widget.parentFacilityName}")}';
+       } else {
+         // Generic fallback
+         mapLink = 'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent("West Visayas State University ${widget.space.name}")}';
+       }
     }
 
-    final text = 'Meet me at $location$contextMsg! 📍\n\nFound via Westigo App.';
-    Share.share(text);
+    final text = 'Meet me at $location$contextMsg! 📍\n\nHere\'s the location:\nSent via Westigo.\n\n'
+        '$mapLink';
+    SharePlus.instance.share(ShareParams(text: text));
   }
 
   @override

@@ -47,14 +47,18 @@ class EventDetailScreen extends ConsumerWidget {
   void _shareEvent(BuildContext context) {
     final dateStr = AppHelpers.formatDateTime(event.startDate);
     final location = event.locationName ?? 'Westigo Campus';
-    
-    // Generate share text
+
+    // Create a specific search query for WVSU + Location Name
+    final mapQuery =
+        Uri.encodeComponent("West Visayas State University $location");
+    final mapLink = 'https://www.google.com/maps/search/?api=1&query=$mapQuery';
+
     final text = 'Check out "${event.name}" at Westigo! 🎓\n\n'
-        '📅 $dateStr\n'
-        '📍 $location\n\n'
-        'See you there!';
-        
-    Share.share(text);
+        '📅 $dateStr\n📍$location\n\nSee you there!'
+        '🗺️ Map: $mapLink'
+        ;
+
+    SharePlus.instance.share(ShareParams(text: text));
   }
 
   @override
