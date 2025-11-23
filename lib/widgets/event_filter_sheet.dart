@@ -62,7 +62,7 @@ class EventFilterSheet extends ConsumerWidget {
                         label: Text(year),
                         selected: isSelected,
                         onSelected: (_) => notifier.toggleYear(year),
-                        selectedColor: AppColors.primary.withOpacity(0.2),
+                        selectedColor: AppColors.primary.withValues(alpha: 0.2),
                         checkmarkColor: AppColors.primary,
                         labelStyle: TextStyle(
                           color: isSelected ? AppColors.primary : Colors.black,
@@ -89,7 +89,7 @@ class EventFilterSheet extends ConsumerWidget {
                         label: Text(college),
                         selected: isSelected,
                         onSelected: (_) => notifier.toggleCollege(college),
-                        selectedColor: Colors.green.withOpacity(0.2),
+                        selectedColor: Colors.green.withValues(alpha: 0.2),
                         checkmarkColor: Colors.green,
                         labelStyle: TextStyle(
                           color: isSelected ? Colors.green : Colors.black,

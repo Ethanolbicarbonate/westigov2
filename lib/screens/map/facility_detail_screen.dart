@@ -39,7 +39,7 @@ class FacilityDetailScreen extends ConsumerWidget {
                   ? Image.network(
                       facility.photoUrl!,
                       fit: BoxFit.cover,
-                      color: Colors.black.withOpacity(0.3),
+                      color: Colors.black.withValues(alpha: 0.3),
                       colorBlendMode: BlendMode.darken,
                     )
                   : Container(color: AppColors.primary),

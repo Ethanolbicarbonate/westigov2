@@ -96,8 +96,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                         return ListTile(
                           leading: CircleAvatar(
                             backgroundColor: result.type == 'Facility'
-                                ? AppColors.primary.withOpacity(0.1)
-                                : Colors.orange.withOpacity(0.1),
+                                ? AppColors.primary.withValues(alpha: 0.1)
+                                : Colors.orange.withValues(alpha: 0.1),
                             child: Icon(
                               result.type == 'Facility'
                                   ? Icons.business

@@ -58,7 +58,7 @@ class EventCard extends StatelessWidget {
                   right: 4,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.3),
+                      color: Colors.black.withValues(alpha: 0.3),
                       shape: BoxShape.circle,
                     ),
                     child: FavoriteButton(
