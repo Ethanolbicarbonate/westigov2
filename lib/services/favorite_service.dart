@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:westigo/models/favorite.dart';
 import 'package:westigo/models/space.dart';
 import 'package:westigo/models/event.dart';
+import 'package:westigo/models/facility.dart'; // Import Facility model
 
 class FavoriteService {
   final SupabaseClient _supabase;
@@ -68,12 +69,32 @@ class FavoriteService {
     if (ids.isEmpty) return [];
 
     // 2. Fetch events matching IDs
-    // Note: We might want location names too, but let's stick to basic fetch for consistency with list
     final eventsResponse =
         await _supabase.from('events').select().inFilter('id', ids);
 
     return (eventsResponse as List)
         .map((json) => Event.fromJson(json))
+        .toList();
+  }
+
+  // Added method for Facilities
+  Future<List<Facility>> getFavoriteFacilities(String userId) async {
+    final favResponse = await _supabase
+        .from('favorites')
+        .select('favoritable_id')
+        .eq('user_id', userId)
+        .eq('favoritable_type', 'facility');
+
+    final ids =
+        (favResponse as List).map((r) => r['favoritable_id'] as int).toList();
+
+    if (ids.isEmpty) return [];
+
+    final facilitiesResponse =
+        await _supabase.from('facilities').select().inFilter('id', ids);
+
+    return (facilitiesResponse as List)
+        .map((json) => Facility.fromJson(json))
         .toList();
   }
 }

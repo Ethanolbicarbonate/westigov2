@@ -27,6 +27,8 @@ dependencies:
 
   flutter_svg: ^2.2.3
 
+  shared_preferences: ^2.2.2
+
   # Backend & Auth
   supabase_flutter: ^2.3.0  # Handles Auth, Database, and Storage
 

@@ -4,6 +4,7 @@ import 'package:westigo/providers/auth_provider.dart';
 import 'package:westigo/services/favorite_service.dart';
 import 'package:westigo/models/space.dart';
 import 'package:westigo/models/event.dart';
+import 'package:westigo/models/facility.dart'; // Import Facility
 
 // Service Provider
 final favoriteServiceProvider = Provider<FavoriteService>((ref) {
@@ -24,6 +25,20 @@ final favoriteSpacesListProvider = FutureProvider<List<Space>>((ref) async {
 
   return await service.getFavoriteSpaces(userId);
 });
+
+// Added provider for Facilities
+final favoriteFacilitiesListProvider = FutureProvider<List<Facility>>((ref) async {
+  final service = ref.read(favoriteServiceProvider);
+  final authState = ref.read(authServiceProvider);
+  final userId = authState.currentUserId;
+
+  if (userId == null) return [];
+
+  ref.watch(userFavoritesProvider);
+
+  return await service.getFavoriteFacilities(userId);
+});
+
 
 // User Favorites List Provider
 // We use StateNotifier to optimistically update the UI (add/remove instantly)
