@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:westigo/providers/auth_provider.dart';
+import 'package:westigo/providers/favorite_provider.dart'; // Added for stats
 import 'package:westigo/providers/user_provider.dart';
 import 'package:westigo/screens/auth/login_screen.dart';
 import 'package:westigo/screens/profile/change_email_screen.dart';
@@ -24,7 +25,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   Future<void> _handleProfilePictureEdit(
       String userId, String? currentUrl) async {
-    // Show Bottom Sheet Options
     showModalBottomSheet(
       context: context,
       builder: (ctx) => SafeArea(
@@ -54,7 +54,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     style: TextStyle(color: Colors.red)),
                 onTap: () {
                   Navigator.pop(ctx);
-                  _confirmDeletePhoto(userId); // Call confirmation
+                  _confirmDeletePhoto(userId);
                 },
               ),
           ],
@@ -86,11 +86,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       try {
         final service = ref.read(userServiceProvider);
         await service.deleteProfilePicture(userId);
-
-        await ref
-            .read(userProfileProvider.notifier)
-            .refresh(); // Full refresh is safer here
-
+        await ref.read(userProfileProvider.notifier).refresh();
         if (mounted) {
           AppHelpers.showSuccessSnackbar(context, 'Profile picture removed');
         }
@@ -109,29 +105,23 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       final picker = ImagePicker();
       final pickedFile = await picker.pickImage(
         source: source,
-        maxWidth: 512, // Resize for performance
+        maxWidth: 512,
         maxHeight: 512,
-        imageQuality: 70, // Compress
+        imageQuality: 70,
       );
 
       if (pickedFile == null) return;
 
       setState(() => _isUploading = true);
 
-      // Upload via service
       final service = ref.read(userServiceProvider);
       final url =
           await service.uploadProfilePicture(userId, File(pickedFile.path));
 
       if (url != null) {
-        // Update User Record in DB
-        // We need to get current profile first to update just the photo
         final currentProfile = ref.read(userProfileProvider).value!;
         final updatedProfile = currentProfile.copyWith(profilePictureUrl: url);
-
         await service.updateUserProfile(updatedProfile);
-
-        // Refresh Local State
         ref.read(userProfileProvider.notifier).updateLocal(updatedProfile);
 
         if (mounted) {
@@ -150,17 +140,40 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final userAsync = ref.watch(userProfileProvider);
+    // Fetch auth user to get 'createdAt'
+    final authUser = ref.watch(authServiceProvider).currentUser;
+    // Fetch favorites count
+    final favoritesAsync = ref.watch(userFavoritesProvider);
+    final favoritesCount = favoritesAsync.asData?.value.length ?? 0;
 
     return Scaffold(
       backgroundColor: AppColors.background,
+      extendBodyBehindAppBar: true, // Allow header to go behind status bar
       appBar: AppBar(
         title: const Text(
           'Profile',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         elevation: 0,
-        foregroundColor: AppColors.textDark,
+        iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit),
+            tooltip: 'Edit Profile',
+            onPressed: userAsync.hasValue && userAsync.value != null
+                ? () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            EditProfileScreen(user: userAsync.value!),
+                      ),
+                    );
+                  }
+                : null,
+          ),
+        ],
       ),
       body: userAsync.when(
         data: (user) {
@@ -172,205 +185,253 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ? '${user.firstName[0]}${user.lastName[0]}'
               : '??';
 
+          final userSince = authUser?.createdAt != null
+              ? DateTime.parse(authUser!.createdAt).year.toString()
+              : DateTime.now().year.toString();
+
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(AppSizes.paddingL),
+            // No padding here, handled inside
             child: Column(
               children: [
-                // Profile Picture with Upload Logic
-                Center(
-                  child: GestureDetector(
-                    onTap: () => _handleProfilePictureEdit(
-                        user.id, user.profilePictureUrl),
-                    child: Stack(
-                      children: [
-                        Container(
-                          width: 100,
-                          height: 100,
+                // 1. Curved Header & Profile Pic Stack
+                Stack(
+                  clipBehavior: Clip.none,
+                  alignment: Alignment.center,
+                  children: [
+                    // Background Curve
+                    ClipPath(
+                      clipper: _HeaderClipper(),
+                      child: Container(
+                        height: 220,
+                        width: double.infinity,
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Color(0xFF0D47A1), // AppColors.primary
+                              Color(0xFF1976D2), // Lighter blue
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Profile Picture
+                    Positioned(
+                      bottom: -50,
+                      child: GestureDetector(
+                        onTap: () => _handleProfilePictureEdit(
+                            user.id, user.profilePictureUrl),
+                        child: Container(
                           decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.1),
                             shape: BoxShape.circle,
                             border: Border.all(color: Colors.white, width: 4),
-                            boxShadow: const [
-                              BoxShadow(color: Colors.black12, blurRadius: 8)
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.15),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
                             ],
-                            image: user.profilePictureUrl != null &&
-                                    !_isUploading
-                                ? DecorationImage(
-                                    image:
-                                        NetworkImage(user.profilePictureUrl!),
-                                    fit: BoxFit.cover,
-                                  )
-                                : null,
                           ),
-                          child: _isUploading
-                              ? const Padding(
-                                  padding: EdgeInsets.all(24.0),
-                                  child:
-                                      CircularProgressIndicator(strokeWidth: 2),
-                                )
-                              : (user.profilePictureUrl == null
-                                  ? Center(
-                                      child: Text(
+                          child: CircleAvatar(
+                            radius: 60,
+                            backgroundColor: Colors.grey.shade200,
+                            backgroundImage: user.profilePictureUrl != null &&
+                                    !_isUploading
+                                ? NetworkImage(user.profilePictureUrl!)
+                                : null,
+                            child: _isUploading
+                                ? const CircularProgressIndicator()
+                                : (user.profilePictureUrl == null
+                                    ? Text(
                                         initials,
                                         style: const TextStyle(
-                                          fontSize: 32,
+                                          fontSize: 40,
                                           fontWeight: FontWeight.bold,
                                           color: AppColors.primary,
                                         ),
-                                      ),
-                                    )
-                                  : null),
-                        ),
-                        // Camera Icon Overlay
-                        Positioned(
-                          bottom: 0,
-                          right: 0,
-                          child: Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: const BoxDecoration(
-                              color: AppColors.primary,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(Icons.camera_alt,
-                                size: 16, color: Colors.white),
+                                      )
+                                    : null),
                           ),
                         ),
-                      ],
+                      ),
                     ),
-                  ),
+                    // Camera Icon Badge
+                    Positioned(
+                      bottom: -45,
+                      right: MediaQuery.of(context).size.width / 2 - 55,
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 2),
+                        ),
+                        child: const Icon(Icons.camera_alt,
+                            size: 16, color: Colors.white),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 16),
 
-                // User Details
+                const SizedBox(height: 60), // Space for the overlapping avatar
+
+                // 2. Name & Course
                 Text(
                   '${user.firstName} ${user.lastName}',
-                  style: const TextStyle(
-                      fontSize: 22, fontWeight: FontWeight.bold),
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  '${user.course} • ${user.yearLevel}',
-                  style: const TextStyle(color: Colors.grey, fontSize: 14),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  user.email,
-                  style: const TextStyle(color: Colors.grey, fontSize: 12),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    '${user.course} • ${user.yearLevel}',
+                    style: const TextStyle(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
                 ),
 
                 const SizedBox(height: 24),
 
-                // Edit Profile Button
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => EditProfileScreen(user: user),
-                        ),
-                      );
-                    },
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      side: const BorderSide(color: AppColors.primary),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppSizes.radiusM),
-                      ),
-                    ),
-                    child: const Text('Edit Profile'),
-                  ),
-                ),
-
-                const SizedBox(height: 32),
-
-                // Account Settings
-                _buildSectionHeader('Account Settings'),
-                const SizedBox(height: 8),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(AppSizes.radiusM),
-                  ),
-                  child: Column(
+                // 3. Stats Row
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: AppSizes.paddingL),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _buildSettingsItem(Icons.info_outline, 'Account Info',
-                          () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => const AccountInfoScreen()));
-                      }),
-                      const Divider(height: 1),
-                      _buildSettingsItem(Icons.email_outlined, 'Change Email',
-                          () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => const ChangeEmailScreen()));
-                      }),
-                      const Divider(height: 1),
-                      _buildSettingsItem(Icons.lock_outline, 'Change Password',
-                          () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => const ChangePasswordScreen()));
-                      }),
+                      _buildStatItem(
+                          favoritesCount.toString(), 'Favorites', Icons.favorite),
+                      Container(
+                          height: 30, width: 1, color: Colors.grey.shade300),
+                      _buildStatItem(userSince, 'User Since',
+                          Icons.calendar_today_outlined),
                     ],
                   ),
                 ),
 
                 const SizedBox(height: 32),
 
-                // Logout Button
-                SizedBox(
-                  width: double.infinity,
-                  child: TextButton(
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (ctx) => AlertDialog(
-                          title: const Text('Log Out'),
-                          content:
-                              const Text('Are you sure you want to log out?'),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(ctx),
-                              child: const Text('Cancel'),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pop(ctx);
-                                ref.read(authServiceProvider).signOut();
-                                Navigator.of(context).pushAndRemoveUntil(
-                                  MaterialPageRoute(
-                                      builder: (_) => const LoginScreen()),
-                                  (route) => false,
-                                );
-                              },
-                              child: const Text(
-                                'Log Out',
-                                style: TextStyle(color: Colors.red),
-                              ),
+                // 4. Settings List
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: AppSizes.paddingL),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildSectionHeader('ACCOUNT'),
+                      const SizedBox(height: 8),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(AppSizes.radiusM),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.05),
+                              blurRadius: 10,
+                              offset: const Offset(0, 2),
                             ),
                           ],
                         ),
-                      );
-                    },
-                    style: TextButton.styleFrom(
-                      foregroundColor: Colors.red,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                    child: const Text(
-                      'Log Out',
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
+                        child: Column(
+                          children: [
+                            _buildSettingsItem(
+                                Icons.person_outline, 'Account Info', () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) =>
+                                          const AccountInfoScreen()));
+                            }),
+                            const Divider(height: 1, indent: 56),
+                            _buildSettingsItem(
+                                Icons.email_outlined, 'Change Email', () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) =>
+                                          const ChangeEmailScreen()));
+                            }),
+                            const Divider(height: 1, indent: 56),
+                            _buildSettingsItem(
+                                Icons.lock_outline, 'Change Password', () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) =>
+                                          const ChangePasswordScreen()));
+                            }),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                      // Logout
+                      SizedBox(
+                        width: double.infinity,
+                        child: TextButton.icon(
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (ctx) => AlertDialog(
+                                title: const Text('Log Out'),
+                                content: const Text(
+                                    'Are you sure you want to log out?'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(ctx),
+                                    child: const Text('Cancel'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(ctx);
+                                      ref.read(authServiceProvider).signOut();
+                                      Navigator.of(context).pushAndRemoveUntil(
+                                        MaterialPageRoute(
+                                            builder: (_) =>
+                                                const LoginScreen()),
+                                        (route) => false,
+                                      );
+                                    },
+                                    child: const Text(
+                                      'Log Out',
+                                      style: TextStyle(color: Colors.red),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.logout, color: Colors.red),
+                          label: const Text(
+                            'Log Out',
+                            style: TextStyle(
+                                color: Colors.red, fontWeight: FontWeight.bold),
+                          ),
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            backgroundColor: Colors.red.withValues(alpha: 0.05),
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.circular(AppSizes.radiusM),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 40),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 32),
               ],
             ),
           );
@@ -381,16 +442,40 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
+  Widget _buildStatItem(String value, String label, IconData icon) {
+    return Column(
+      children: [
+        Icon(icon, color: AppColors.primary, size: 24),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: AppColors.textDark,
+          ),
+        ),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 12,
+            color: Colors.grey,
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildSectionHeader(String title) {
-    return Align(
-      alignment: Alignment.centerLeft,
+    return Padding(
+      padding: const EdgeInsets.only(left: 4, bottom: 4),
       child: Text(
         title,
-        style: const TextStyle(
-          fontSize: 14,
+        style: TextStyle(
+          fontSize: 12,
           fontWeight: FontWeight.bold,
-          color: Colors.grey,
-          letterSpacing: 0.5,
+          color: Colors.grey.shade600,
+          letterSpacing: 1.2,
         ),
       ),
     );
@@ -398,10 +483,41 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   Widget _buildSettingsItem(IconData icon, String title, VoidCallback onTap) {
     return ListTile(
-      leading: Icon(icon, color: AppColors.primary),
-      title: Text(title),
-      trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: AppColors.background,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(icon, size: 20, color: AppColors.primary),
+      ),
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
+      trailing: const Icon(Icons.chevron_right, size: 20, color: Colors.grey),
       onTap: onTap,
+      contentPadding:
+          const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
     );
   }
+}
+
+// Custom Clipper for the Curved Header
+class _HeaderClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+    path.lineTo(0, size.height - 50); // Start line down
+    // Create a quadratic bezier curve for the bottom edge
+    path.quadraticBezierTo(
+      size.width / 2, // Control point x (center)
+      size.height, // Control point y (bottom)
+      size.width, // End point x (right)
+      size.height - 50, // End point y
+    );
+    path.lineTo(size.width, 0); // Line up to top right
+    path.close(); // Close path
+    return path;
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
 }
