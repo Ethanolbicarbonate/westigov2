@@ -10,6 +10,7 @@ import 'package:westigo/widgets/facility_bottom_sheet.dart';
 import 'package:westigo/widgets/map_search_bar.dart';
 import 'package:westigo/providers/search_provider.dart';
 import 'package:westigo/screens/map/search_screen.dart';
+import 'package:westigo/widgets/map_recenter_button.dart';
 
 // Change to ConsumerStatefulWidget
 class MapScreen extends ConsumerStatefulWidget {
@@ -21,7 +22,7 @@ class MapScreen extends ConsumerStatefulWidget {
 
 class _MapScreenState extends ConsumerState<MapScreen> {
   // Use your custom coordinates here
-  static final LatLng _wvsuCenter = LatLng(10.712805, 122.562543);
+  static const LatLng _wvsuCenter = LatLng(10.712805, 122.562543);
   final MapController _mapController = MapController();
 
   @override
@@ -46,8 +47,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               maxZoom: 19.0,
               cameraConstraint: CameraConstraint.contain(
                 bounds: LatLngBounds(
-                  LatLng(10.7050, 122.5520),
-                  LatLng(10.7205, 122.5730),
+                  const LatLng(10.7050, 122.5520),
+                  const LatLng(10.7205, 122.5730),
                 ),
               ),
               interactionOptions: const InteractionOptions(
@@ -115,6 +116,15 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                 ],
               ),
             ],
+          ),
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 16, // Below logout button
+            right: 16,
+            child: MapRecenterButton(
+              onPressed: () {
+                _mapController.move(_wvsuCenter, 17.0);
+              },
+            ),
           ),
           Positioned(
             left: 0,
