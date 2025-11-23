@@ -163,7 +163,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 
                   // Course
                   DropdownButtonFormField<String>(
-                    value: _selectedCourse,
+                    initialValue: _selectedCourse,
                     decoration: const InputDecoration(
                       labelText: 'Course/College',
                       border: OutlineInputBorder(),
@@ -178,7 +178,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 
                   // Year Level
                   DropdownButtonFormField<String>(
-                    value: _selectedYearLevel,
+                    initialValue: _selectedYearLevel,
                     decoration: const InputDecoration(
                       labelText: 'Year Level',
                       border: OutlineInputBorder(),

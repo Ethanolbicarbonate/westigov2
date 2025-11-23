@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:westigo/models/event.dart';
 import 'package:westigo/utils/constants.dart';
 import 'package:westigo/utils/helpers.dart';
@@ -16,107 +17,162 @@ class EventCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Parse date parts
+    final month = DateFormat('MMM').format(event.startDate).toUpperCase();
+    final day = DateFormat('d').format(event.startDate);
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
+        margin: const EdgeInsets.only(bottom: 4), // Tiny margin for shadow separation
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(AppSizes.radiusM),
-          boxShadow: const [
+          boxShadow: [
             BoxShadow(
-              color: Colors.black12,
-              blurRadius: 4,
-              offset: Offset(0, 2),
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // 1. Image Area
             Stack(
               children: [
+                // Hero Image
                 ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(AppSizes.radiusM),
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(AppSizes.radiusM)),
+                  child: Hero(
+                    tag: 'event-img-${event.id}',
+                    child: SizedBox(
+                      height: 160,
+                      width: double.infinity,
+                      child: event.imageUrl != null
+                          ? Image.network(
+                              event.imageUrl!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => _buildPlaceholder(),
+                            )
+                          : _buildPlaceholder(),
+                    ),
                   ),
-                  child: SizedBox(
-                    height: 140,
-                    width: double.infinity,
-                    child: event.imageUrl != null
-                        ? Image.network(
-                            event.imageUrl!,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => _buildPlaceholder(),
-                          )
-                        : _buildPlaceholder(),
+                ),
+                
+                // Gradient Overlay (Bottom of image)
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    height: 60,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withValues(alpha: 0.5),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
 
-                /// Favorite Button overlay
+                // Date Badge (Top Left)
                 Positioned(
-                  top: 4,
-                  right: 4,
+                  top: 12,
+                  left: 12,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 4)],
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          month,
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          day,
+                          style: const TextStyle(
+                            color: Colors.black87,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            height: 1.0,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Favorite Button (Top Right) - Reused
+                Positioned(
+                  top: 8,
+                  right: 8,
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.3),
                       shape: BoxShape.circle,
                     ),
-                    child: FavoriteButton(
-                      type: 'event',
-                      id: event.id,
-                    ),
+                    child: FavoriteButton(type: 'event', id: event.id),
                   ),
                 ),
               ],
             ),
-            // 2. Details
+
+            // 2. Details Area
             Padding(
               padding: const EdgeInsets.all(AppSizes.paddingM),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Date
-                  Text(
-                    AppHelpers.formatDateTime(event.startDate),
-                    style: const TextStyle(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-
                   // Title
                   Text(
                     event.name,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                      fontSize: 18,
+                      height: 1.2,
                     ),
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 8),
 
-                  // Description
-                  if (event.description != null)
-                    Text(
-                      event.description!,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textLight,
-                          ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-
+                  // Location & Time Row
+                  Row(
+                    children: [
+                      const Icon(Icons.access_time, size: 14, color: Colors.grey),
+                      const SizedBox(width: 4),
+                      Text(
+                        DateFormat('h:mm a').format(event.startDate),
+                        style: const TextStyle(color: Colors.grey, fontSize: 12),
+                      ),
+                      const SizedBox(width: 16),
+                      // Optional Location if available
+                      const Icon(Icons.location_on, size: 14, color: Colors.grey),
+                      // ...
+                    ],
+                  ),
+                  
                   const SizedBox(height: 12),
 
-                  // 3. Audience Tags
+                  // Audience Tags
                   Wrap(
-                    spacing: 8,
+                    spacing: 6,
                     runSpacing: 4,
-                    children:
-                        event.scopes.map((scope) => _buildTag(scope)).toList(),
+                    children: event.scopes.map((scope) => _buildTag(scope)).toList(),
                   ),
                 ],
               ),
@@ -126,7 +182,6 @@ class EventCard extends StatelessWidget {
       ),
     );
   }
-
   Widget _buildPlaceholder() {
     return Container(
       color: Colors.grey[200],

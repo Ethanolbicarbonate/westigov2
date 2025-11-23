@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:westigo/models/event.dart';
-import 'package:westigo/providers/search_provider.dart'; 
+import 'package:westigo/providers/search_provider.dart';
 import 'package:westigo/screens/map/space_detail_screen.dart';
 import 'package:westigo/utils/constants.dart';
 import 'package:westigo/utils/helpers.dart';
@@ -23,10 +23,10 @@ class EventDetailScreen extends ConsumerWidget {
     try {
       // Fetch the space details using the service provider
       final spaceService = ref.read(spaceServiceProvider);
-      
+
       // Note: Ensure your SpaceService has a getSpaceById method implemented
       final space = await spaceService.getSpaceById(event.locationId!);
-      
+
       if (context.mounted) {
         if (space != null) {
           Navigator.push(
@@ -39,7 +39,7 @@ class EventDetailScreen extends ConsumerWidget {
             ),
           );
         } else {
-           ScaffoldMessenger.of(context).showSnackBar(
+          ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Location details not found')),
           );
         }
@@ -67,14 +67,17 @@ class EventDetailScreen extends ConsumerWidget {
               FavoriteButton(type: 'event', id: event.id),
             ],
             flexibleSpace: FlexibleSpaceBar(
-              background: event.imageUrl != null
-                  ? Image.network(
-                      event.imageUrl!,
-                      fit: BoxFit.cover,
-                      color: Colors.black.withValues(alpha: 0.2),
-                      colorBlendMode: BlendMode.darken,
-                    )
-                  : Container(color: AppColors.primary),
+              background: Hero(
+                tag: 'event-img-${event.id}',
+                child: event.imageUrl != null
+                    ? Image.network(
+                        event.imageUrl!,
+                        fit: BoxFit.cover,
+                        color: Colors.black.withValues(alpha: 0.2),
+                        colorBlendMode: BlendMode.darken,
+                      )
+                    : Container(color: AppColors.primary),
+              ),
             ),
           ),
 
@@ -96,16 +99,14 @@ class EventDetailScreen extends ConsumerWidget {
                   const SizedBox(height: 16),
 
                   // Info Row (Date & Time)
-                  _buildInfoRow(
-                    Icons.calendar_today, 
-                    AppHelpers.formatDateTime(event.startDate)
-                  ),
+                  _buildInfoRow(Icons.calendar_today,
+                      AppHelpers.formatDateTime(event.startDate)),
                   const SizedBox(height: 12),
-                  
+
                   // Info Row (Location)
                   _buildInfoRow(
-                    Icons.location_on, 
-                    'Tap to view location', 
+                    Icons.location_on,
+                    'Tap to view location',
                     isLink: true,
                     onTap: () => _handleLocationTap(context, ref),
                   ),
@@ -145,13 +146,15 @@ class EventDetailScreen extends ConsumerWidget {
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: event.scopes.map((s) => Chip(
-                      label: Text(s),
-                      backgroundColor: AppColors.background,
-                      labelStyle: const TextStyle(fontSize: 12),
-                    )).toList(),
+                    children: event.scopes
+                        .map((s) => Chip(
+                              label: Text(s),
+                              backgroundColor: AppColors.background,
+                              labelStyle: const TextStyle(fontSize: 12),
+                            ))
+                        .toList(),
                   ),
-                  
+
                   // Bottom Padding
                   const SizedBox(height: 40),
                 ],
@@ -163,7 +166,8 @@ class EventDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String text, {bool isLink = false, VoidCallback? onTap}) {
+  Widget _buildInfoRow(IconData icon, String text,
+      {bool isLink = false, VoidCallback? onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: Row(
