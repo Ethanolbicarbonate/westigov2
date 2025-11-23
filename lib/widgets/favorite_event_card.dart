@@ -4,6 +4,7 @@ import 'package:westigo/models/event.dart';
 import 'package:westigo/providers/favorite_provider.dart';
 import 'package:westigo/utils/constants.dart';
 import 'package:westigo/utils/helpers.dart';
+import 'package:westigo/widgets/app_network_image.dart'; // Import
 
 class FavoriteEventCard extends ConsumerWidget {
   final Event event;
@@ -37,16 +38,11 @@ class FavoriteEventCard extends ConsumerWidget {
             // Image
             ClipRRect(
               borderRadius: const BorderRadius.horizontal(left: Radius.circular(AppSizes.radiusM)),
-              child: SizedBox(
+              child: AppNetworkImage(
+                imageUrl: event.imageUrl,
                 width: 100,
                 height: 100,
-                child: event.imageUrl != null
-                    ? Image.network(
-                        event.imageUrl!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(color: Colors.grey[200]),
-                      )
-                    : Container(color: Colors.grey[200], child: const Icon(Icons.event, color: Colors.grey)),
+                fallbackIcon: Icons.event,
               ),
             ),
             

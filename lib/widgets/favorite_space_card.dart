@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:westigo/models/space.dart';
 import 'package:westigo/providers/favorite_provider.dart';
 import 'package:westigo/utils/constants.dart';
+import 'package:westigo/widgets/app_network_image.dart'; // Import
 
 class FavoriteSpaceCard extends ConsumerWidget {
   final Space space;
@@ -36,16 +37,11 @@ class FavoriteSpaceCard extends ConsumerWidget {
             // Image
             ClipRRect(
               borderRadius: const BorderRadius.horizontal(left: Radius.circular(AppSizes.radiusM)),
-              child: SizedBox(
+              child: AppNetworkImage(
+                imageUrl: space.photoUrl,
                 width: 100,
                 height: 100,
-                child: space.photoUrl != null
-                    ? Image.network(
-                        space.photoUrl!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(color: Colors.grey[200]),
-                      )
-                    : Container(color: Colors.grey[200], child: const Icon(Icons.meeting_room, color: Colors.grey)),
+                fallbackIcon: Icons.meeting_room,
               ),
             ),
             
@@ -85,7 +81,6 @@ class FavoriteSpaceCard extends ConsumerWidget {
             IconButton(
               icon: const Icon(Icons.remove_circle_outline, color: Colors.red),
               onPressed: () {
-                // Show confirmation dialog
                 showDialog(
                   context: context,
                   builder: (ctx) => AlertDialog(

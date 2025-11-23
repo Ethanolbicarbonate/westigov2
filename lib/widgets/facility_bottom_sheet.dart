@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:westigo/models/facility.dart';
 import 'package:westigo/utils/constants.dart';
+import 'package:westigo/widgets/app_network_image.dart'; // Import
 
 class FacilityBottomSheet extends StatelessWidget {
   final Facility facility;
@@ -53,27 +54,21 @@ class FacilityBottomSheet extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           
-          // Photo with Hero
-          if (facility.photoUrl != null)
-            Hero(
-              tag: 'facility-img-${facility.id}', // Unique tag
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(AppSizes.radiusM),
-                child: Image.network(
-                  facility.photoUrl!,
-                  height: 150,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      height: 150,
-                      color: Colors.grey[200],
-                      child: const Center(child: Icon(Icons.image_not_supported)),
-                    );
-                  },
+          // Photo with Hero and AppNetworkImage
+          Hero(
+            tag: 'facility-img-${facility.id}',
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(AppSizes.radiusM),
+              child: SizedBox(
+                height: 150,
+                width: double.infinity,
+                child: AppNetworkImage(
+                  imageUrl: facility.photoUrl,
+                  fallbackIcon: Icons.business,
                 ),
               ),
             ),
+          ),
           
           const SizedBox(height: 12),
           

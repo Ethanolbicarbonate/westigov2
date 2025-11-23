@@ -6,6 +6,7 @@ import 'package:westigo/providers/facility_provider.dart';
 import 'package:westigo/screens/map/facility_detail_screen.dart';
 import 'package:westigo/utils/constants.dart';
 import 'package:westigo/widgets/favorite_button.dart';
+import 'package:westigo/widgets/app_network_image.dart'; // Import
 
 class SpaceDetailScreen extends ConsumerStatefulWidget {
   final Space space;
@@ -77,9 +78,9 @@ class _SpaceDetailScreenState extends ConsumerState<SpaceDetailScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.space.name, style: const TextStyle(color: Colors.white)), // Force White
+        title: Text(widget.space.name, style: const TextStyle(color: Colors.white)),
         backgroundColor: AppColors.primary,
-        iconTheme: const IconThemeData(color: Colors.white), // Force Back Button White
+        iconTheme: const IconThemeData(color: Colors.white),
         actions: [
           FavoriteButton(type: 'space', id: widget.space.id),
         ],
@@ -89,18 +90,16 @@ class _SpaceDetailScreenState extends ConsumerState<SpaceDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (widget.space.photoUrl != null)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(AppSizes.radiusM),
-                child: Image.network(
-                  widget.space.photoUrl!,
-                  width: double.infinity,
-                  height: 200,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) =>
-                      Container(height: 200, color: Colors.grey[200]),
-                ),
+            // Photo with AppNetworkImage
+            ClipRRect(
+              borderRadius: BorderRadius.circular(AppSizes.radiusM),
+              child: AppNetworkImage(
+                imageUrl: widget.space.photoUrl,
+                width: double.infinity,
+                height: 200,
+                fallbackIcon: Icons.meeting_room,
               ),
+            ),
             
             const SizedBox(height: 24),
 
@@ -163,7 +162,7 @@ class _SpaceDetailScreenState extends ConsumerState<SpaceDetailScreen> {
           children: [
             Icon(icon, color: AppColors.primary, size: 20),
             const SizedBox(width: 12),
-            Expanded( // Added Expanded to prevent overflow
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -173,7 +172,6 @@ class _SpaceDetailScreenState extends ConsumerState<SpaceDetailScreen> {
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 16,
-                      // No underline, just color
                       color: isLink ? AppColors.primary : Colors.black87,
                     ),
                   ),

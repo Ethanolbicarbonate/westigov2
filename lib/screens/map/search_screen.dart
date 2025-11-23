@@ -7,6 +7,7 @@ import 'package:westigo/utils/constants.dart';
 import 'package:westigo/models/space.dart';
 import 'package:westigo/screens/map/space_detail_screen.dart';
 import 'package:westigo/widgets/empty_state_widget.dart';
+import 'package:westigo/utils/debouncer.dart'; // Import Debouncer
 
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
@@ -18,11 +19,11 @@ class SearchScreen extends ConsumerStatefulWidget {
 class _SearchScreenState extends ConsumerState<SearchScreen> {
   final _searchController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
+  final _debouncer = Debouncer(milliseconds: 300); // Initialize Debouncer
 
   @override
   void initState() {
     super.initState();
-    // Auto-focus the text field when screen opens
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
     });
@@ -32,12 +33,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   void dispose() {
     _searchController.dispose();
     _focusNode.dispose();
+    _debouncer.dispose(); // Dispose Debouncer
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // Watch the results
     final results = ref.watch(searchResultsProvider);
 
     return Scaffold(
@@ -45,7 +46,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // 1. Search Header
             Container(
               padding: const EdgeInsets.all(AppSizes.paddingM),
               decoration: const BoxDecoration(
@@ -56,7 +56,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   IconButton(
                     icon: const Icon(Icons.arrow_back),
                     onPressed: () {
-                      // Clear query when closing
                       ref.read(searchQueryProvider.notifier).state = '';
                       Navigator.pop(context);
                     },
@@ -70,7 +69,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                         border: InputBorder.none,
                       ),
                       onChanged: (value) {
-                        ref.read(searchQueryProvider.notifier).state = value;
+                        // Use Debouncer here
+                        _debouncer.run(() {
+                          ref.read(searchQueryProvider.notifier).state = value;
+                        });
                       },
                     ),
                   ),
@@ -86,14 +88,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               ),
             ),
 
-            // 2. Results List
             Expanded(
               child: results.isEmpty && _searchController.text.isNotEmpty
                   ? const EmptyStateWidget(
                       icon: Icons.search_off,
                       title: 'No results found',
-                      subtitle:
-                          'Try adjusting your search terms or look for a different facility.',
+                      subtitle: 'Try adjusting your search terms or look for a different facility.',
                     )
                   : ListView.builder(
                       itemCount: results.length,
@@ -137,16 +137,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                               );
                             } else {
                               final space = result.originalObject as Space;
-                              // We try to infer parent name from description or just leave generic
-                              // In a real app, we might fetch the parent facility name here
-
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => SpaceDetailScreen(
                                     space: space,
-                                    parentFacilityName:
-                                        'See Facility Details', // Placeholder logic
+                                    parentFacilityName: 'See Facility Details',
                                   ),
                                 ),
                               );

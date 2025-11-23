@@ -6,6 +6,7 @@ import 'package:westigo/screens/map/space_detail_screen.dart';
 import 'package:westigo/utils/constants.dart';
 import 'package:westigo/utils/helpers.dart';
 import 'package:westigo/widgets/favorite_button.dart';
+import 'package:westigo/widgets/app_network_image.dart';
 
 class EventDetailScreen extends ConsumerWidget {
   final Event event;
@@ -51,25 +52,40 @@ class EventDetailScreen extends ConsumerWidget {
             expandedHeight: 250.0,
             floating: false,
             pinned: true,
-            iconTheme: const IconThemeData(color: Colors.white), // Force white back arrow
+            // 1. Force white back arrow
+            iconTheme: const IconThemeData(color: Colors.white),
             actions: [
               FavoriteButton(type: 'event', id: event.id),
             ],
             flexibleSpace: FlexibleSpaceBar(
               background: Hero(
                 tag: 'event-img-${event.id}',
-                child: event.imageUrl != null
-                    ? Image.network(
-                        event.imageUrl!,
-                        fit: BoxFit.cover,
-                        color: Colors.black.withValues(alpha: 0.2),
-                        colorBlendMode: BlendMode.darken,
-                      )
-                    : Container(color: AppColors.primary),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    // 2. Use AppNetworkImage
+                    AppNetworkImage(
+                      imageUrl: event.imageUrl,
+                      fallbackIcon: Icons.event,
+                    ),
+                    // Gradient Overlay for contrast
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            Colors.black.withValues(alpha: 0.2),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
-
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(AppSizes.paddingL),
@@ -84,23 +100,20 @@ class EventDetailScreen extends ConsumerWidget {
                         ),
                   ),
                   const SizedBox(height: 16),
-
                   _buildInfoRow(Icons.calendar_today,
                       AppHelpers.formatDateTime(event.startDate)),
                   const SizedBox(height: 12),
-
                   if (event.locationId != null)
                     _buildInfoRow(
                       Icons.location_on,
+                      // 3. Use actual location name instead of generic text
                       event.locationName ?? 'View Location Details',
                       isLink: true,
                       onTap: () => _handleLocationTap(context, ref),
                     ),
-
                   const SizedBox(height: 24),
                   const Divider(),
                   const SizedBox(height: 24),
-
                   if (event.description != null) ...[
                     Text(
                       'About this Event',
@@ -118,7 +131,6 @@ class EventDetailScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 24),
                   ],
-
                   Text(
                     'Who should attend?',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
@@ -169,12 +181,14 @@ class EventDetailScreen extends ConsumerWidget {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
+                // 4. Color indicates link, no underline needed
                 color: isLink ? AppColors.primary : AppColors.textDark,
               ),
             ),
           ),
           if (isLink)
-            const Icon(Icons.arrow_forward_ios, size: 14, color: AppColors.primary),
+            const Icon(Icons.arrow_forward_ios,
+                size: 14, color: AppColors.primary),
         ],
       ),
     );

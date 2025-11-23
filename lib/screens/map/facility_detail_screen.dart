@@ -6,6 +6,8 @@ import 'package:westigo/utils/constants.dart';
 import 'package:westigo/utils/page_transitions.dart';
 import 'package:westigo/screens/map/space_detail_screen.dart';
 import 'package:westigo/widgets/favorite_button.dart';
+import 'package:westigo/utils/debouncer.dart'; // Import
+import 'package:westigo/widgets/app_network_image.dart';
 
 class FacilityDetailScreen extends ConsumerStatefulWidget {
   final Facility facility;
@@ -13,16 +15,20 @@ class FacilityDetailScreen extends ConsumerStatefulWidget {
   const FacilityDetailScreen({super.key, required this.facility});
 
   @override
-  ConsumerState<FacilityDetailScreen> createState() => _FacilityDetailScreenState();
+  ConsumerState<FacilityDetailScreen> createState() =>
+      _FacilityDetailScreenState();
 }
 
 class _FacilityDetailScreenState extends ConsumerState<FacilityDetailScreen> {
+  // 1. Add Search State
   final TextEditingController _searchController = TextEditingController();
+  final _debouncer = Debouncer(milliseconds: 300);
   String _searchQuery = '';
 
   @override
   void dispose() {
     _searchController.dispose();
+    _debouncer.dispose();
     super.dispose();
   }
 
@@ -43,7 +49,9 @@ class _FacilityDetailScreenState extends ConsumerState<FacilityDetailScreen> {
             ],
             iconTheme: const IconThemeData(color: Colors.white),
             flexibleSpace: FlexibleSpaceBar(
-              titlePadding: const EdgeInsets.only(left: 16, bottom: 16, right: 16),
+              // 2. Improved Title Placement
+              titlePadding:
+                  const EdgeInsets.only(left: 16, bottom: 16, right: 16),
               centerTitle: false,
               title: Text(
                 widget.facility.name,
@@ -53,40 +61,38 @@ class _FacilityDetailScreenState extends ConsumerState<FacilityDetailScreen> {
                   fontWeight: FontWeight.bold,
                   shadows: [
                     Shadow(
-                      offset: Offset(0, 1),
-                      blurRadius: 3.0,
-                      color: Colors.black54,
-                    ),
+                        offset: Offset(0, 1),
+                        blurRadius: 3.0,
+                        color: Colors.black54),
                   ],
                 ),
               ),
               background: Hero(
                 tag: 'facility-img-${widget.facility.id}',
-                child: widget.facility.photoUrl != null
-                    ? Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          Image.network(
-                            widget.facility.photoUrl!,
-                            fit: BoxFit.cover,
-                          ),
-                          const DecoratedBox(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [Colors.transparent, Colors.black54],
-                                stops: [0.6, 1.0],
-                              ),
-                            ),
-                          ),
-                        ],
-                      )
-                    : Container(color: AppColors.primary),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    // 3. Use AppNetworkImage
+                    AppNetworkImage(
+                      imageUrl: widget.facility.photoUrl,
+                      fallbackIcon: Icons.business,
+                    ),
+                    // Gradient for text readability
+                    const DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [Colors.transparent, Colors.black54],
+                          stops: [0.6, 1.0],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
-          
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(AppSizes.paddingL),
@@ -114,8 +120,8 @@ class _FacilityDetailScreenState extends ConsumerState<FacilityDetailScreen> {
                         ),
                   ),
                   const SizedBox(height: 12),
-                  
-                  // Search Bar
+
+                  // 4. Search Bar
                   TextField(
                     controller: _searchController,
                     decoration: InputDecoration(
@@ -130,8 +136,11 @@ class _FacilityDetailScreenState extends ConsumerState<FacilityDetailScreen> {
                       contentPadding: const EdgeInsets.symmetric(vertical: 0),
                     ),
                     onChanged: (value) {
-                      setState(() {
-                        _searchQuery = value.toLowerCase();
+                      // 5. Debounce the search input
+                      _debouncer.run(() {
+                        setState(() {
+                          _searchQuery = value.toLowerCase();
+                        });
                       });
                     },
                   ),
@@ -140,10 +149,9 @@ class _FacilityDetailScreenState extends ConsumerState<FacilityDetailScreen> {
               ),
             ),
           ),
-
           spacesAsync.when(
             data: (spaces) {
-              // Local Filtering Logic
+              // 6. Filter spaces based on query
               final filteredSpaces = spaces.where((space) {
                 return space.name.toLowerCase().contains(_searchQuery);
               }).toList();
@@ -151,18 +159,21 @@ class _FacilityDetailScreenState extends ConsumerState<FacilityDetailScreen> {
               if (filteredSpaces.isEmpty) {
                 return const SliverToBoxAdapter(
                   child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: AppSizes.paddingL, vertical: 20),
-                    child: Center(child: Text('No spaces found matching your search.')),
+                    padding: EdgeInsets.symmetric(
+                        horizontal: AppSizes.paddingL, vertical: 20),
+                    child: Center(
+                        child: Text('No spaces found matching your search.')),
                   ),
                 );
               }
-              
+
               return SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
                     final space = filteredSpaces[index];
                     return ListTile(
-                      leading: const Icon(Icons.meeting_room, color: Colors.grey),
+                      leading:
+                          const Icon(Icons.meeting_room, color: Colors.grey),
                       title: Text(space.name),
                       subtitle: space.floorLevel != null
                           ? Text(space.floorLevel!)

@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:westigo/models/event.dart';
 import 'package:westigo/utils/constants.dart';
 import 'package:westigo/widgets/favorite_button.dart';
+import 'package:westigo/widgets/app_network_image.dart'; // Import
 
 class EventCard extends StatelessWidget {
   final Event event;
@@ -47,13 +48,10 @@ class EventCard extends StatelessWidget {
                     child: SizedBox(
                       height: 160,
                       width: double.infinity,
-                      child: event.imageUrl != null
-                          ? Image.network(
-                              event.imageUrl!,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => _buildPlaceholder(),
-                            )
-                          : _buildPlaceholder(),
+                      child: AppNetworkImage(
+                        imageUrl: event.imageUrl,
+                        fallbackIcon: Icons.event,
+                      ),
                     ),
                   ),
                 ),
@@ -124,7 +122,6 @@ class EventCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
 
-                  // UPDATED LOCATION ROW
                   Row(
                     children: [
                       const Icon(Icons.access_time, size: 14, color: Colors.grey),
@@ -164,15 +161,7 @@ class EventCard extends StatelessWidget {
     );
   }
 
-  Widget _buildPlaceholder() {
-    return Container(
-      color: Colors.grey[200],
-      child: const Center(child: Icon(Icons.event, color: Colors.grey, size: 40)),
-    );
-  }
-
   Widget _buildTag(String text) {
-    // ... existing tag logic ...
     Color bg = Colors.grey.shade200;
     Color fg = Colors.grey.shade800;
     if (text == 'All Students') { bg = Colors.blueGrey.shade100; fg = Colors.blueGrey.shade800; }
@@ -181,7 +170,7 @@ class EventCard extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(10)),
+      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(4)),
       child: Text(text, style: TextStyle(color: fg, fontSize: 10, fontWeight: FontWeight.bold)),
     );
   }
