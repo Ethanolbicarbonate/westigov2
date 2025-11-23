@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:share_plus/share_plus.dart'; // Import share_plus
+import 'package:share_plus/share_plus.dart';
 import 'package:westigo/models/facility.dart';
 import 'package:westigo/models/space.dart';
 import 'package:westigo/providers/facility_provider.dart';
