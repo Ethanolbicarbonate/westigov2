@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart'; // Import share_plus
 import 'package:westigo/models/facility.dart';
 import 'package:westigo/models/space.dart';
 import 'package:westigo/providers/facility_provider.dart';
 import 'package:westigo/screens/map/facility_detail_screen.dart';
 import 'package:westigo/utils/constants.dart';
 import 'package:westigo/widgets/favorite_button.dart';
-import 'package:westigo/widgets/app_network_image.dart'; // Import
+import 'package:westigo/widgets/app_network_image.dart';
 
 class SpaceDetailScreen extends ConsumerStatefulWidget {
   final Space space;
@@ -63,6 +64,24 @@ class _SpaceDetailScreenState extends ConsumerState<SpaceDetailScreen> {
     }
   }
 
+  void _shareSpace() {
+    String location = widget.space.name;
+    if (widget.space.floorLevel != null) {
+      location += ' (${widget.space.floorLevel})';
+    }
+    
+    // Add facility context if available
+    String contextMsg = '';
+    if (_parentFacility != null) {
+      contextMsg = ' inside ${_parentFacility!.name}';
+    } else if (widget.parentFacilityName != null) {
+      contextMsg = ' inside ${widget.parentFacilityName}';
+    }
+
+    final text = 'Meet me at $location$contextMsg! 📍\n\nFound via Westigo App.';
+    Share.share(text);
+  }
+
   @override
   Widget build(BuildContext context) {
     String locationText = 'Loading...';
@@ -82,6 +101,12 @@ class _SpaceDetailScreenState extends ConsumerState<SpaceDetailScreen> {
         backgroundColor: AppColors.primary,
         iconTheme: const IconThemeData(color: Colors.white),
         actions: [
+          // Share Button
+          IconButton(
+            icon: const Icon(Icons.share),
+            tooltip: 'Share Space',
+            onPressed: _shareSpace,
+          ),
           FavoriteButton(type: 'space', id: widget.space.id),
         ],
       ),

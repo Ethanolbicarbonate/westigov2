@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart'; // Import share_plus
 import 'package:westigo/models/event.dart';
 import 'package:westigo/providers/search_provider.dart';
 import 'package:westigo/screens/map/space_detail_screen.dart';
@@ -43,6 +44,19 @@ class EventDetailScreen extends ConsumerWidget {
     }
   }
 
+  void _shareEvent(BuildContext context) {
+    final dateStr = AppHelpers.formatDateTime(event.startDate);
+    final location = event.locationName ?? 'Westigo Campus';
+    
+    // Generate share text
+    final text = 'Check out "${event.name}" at Westigo! 🎓\n\n'
+        '📅 $dateStr\n'
+        '📍 $location\n\n'
+        'See you there!';
+        
+    Share.share(text);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
@@ -52,9 +66,14 @@ class EventDetailScreen extends ConsumerWidget {
             expandedHeight: 250.0,
             floating: false,
             pinned: true,
-            // 1. Force white back arrow
             iconTheme: const IconThemeData(color: Colors.white),
             actions: [
+              // Share Button
+              IconButton(
+                icon: const Icon(Icons.share),
+                tooltip: 'Share Event',
+                onPressed: () => _shareEvent(context),
+              ),
               FavoriteButton(type: 'event', id: event.id),
             ],
             flexibleSpace: FlexibleSpaceBar(
@@ -63,12 +82,10 @@ class EventDetailScreen extends ConsumerWidget {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    // 2. Use AppNetworkImage
                     AppNetworkImage(
                       imageUrl: event.imageUrl,
                       fallbackIcon: Icons.event,
                     ),
-                    // Gradient Overlay for contrast
                     Container(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
@@ -106,7 +123,6 @@ class EventDetailScreen extends ConsumerWidget {
                   if (event.locationId != null)
                     _buildInfoRow(
                       Icons.location_on,
-                      // 3. Use actual location name instead of generic text
                       event.locationName ?? 'View Location Details',
                       isLink: true,
                       onTap: () => _handleLocationTap(context, ref),
@@ -181,7 +197,6 @@ class EventDetailScreen extends ConsumerWidget {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                // 4. Color indicates link, no underline needed
                 color: isLink ? AppColors.primary : AppColors.textDark,
               ),
             ),

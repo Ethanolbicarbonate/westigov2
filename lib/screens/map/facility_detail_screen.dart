@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:westigo/models/facility.dart';
 import 'package:westigo/providers/facility_provider.dart';
 import 'package:westigo/utils/constants.dart';
 import 'package:westigo/utils/page_transitions.dart';
 import 'package:westigo/screens/map/space_detail_screen.dart';
 import 'package:westigo/widgets/favorite_button.dart';
-import 'package:westigo/utils/debouncer.dart'; // Import
+import 'package:westigo/utils/debouncer.dart';
 import 'package:westigo/widgets/app_network_image.dart';
 
 class FacilityDetailScreen extends ConsumerStatefulWidget {
@@ -20,7 +21,6 @@ class FacilityDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _FacilityDetailScreenState extends ConsumerState<FacilityDetailScreen> {
-  // 1. Add Search State
   final TextEditingController _searchController = TextEditingController();
   final _debouncer = Debouncer(milliseconds: 300);
   String _searchQuery = '';
@@ -30,6 +30,12 @@ class _FacilityDetailScreenState extends ConsumerState<FacilityDetailScreen> {
     _searchController.dispose();
     _debouncer.dispose();
     super.dispose();
+  }
+
+  void _shareFacility() {
+    final text = 'Meet me at ${widget.facility.name}! 🏢\n\n'
+        'Here\'s the location on Westigo.';
+    Share.share(text);
   }
 
   @override
@@ -45,11 +51,16 @@ class _FacilityDetailScreenState extends ConsumerState<FacilityDetailScreen> {
             pinned: true,
             backgroundColor: AppColors.primary,
             actions: [
+              // Share Button
+              IconButton(
+                icon: const Icon(Icons.share),
+                tooltip: 'Share Location',
+                onPressed: _shareFacility,
+              ),
               FavoriteButton(type: 'facility', id: widget.facility.id),
             ],
             iconTheme: const IconThemeData(color: Colors.white),
             flexibleSpace: FlexibleSpaceBar(
-              // 2. Improved Title Placement
               titlePadding:
                   const EdgeInsets.only(left: 16, bottom: 16, right: 16),
               centerTitle: false,
@@ -72,12 +83,10 @@ class _FacilityDetailScreenState extends ConsumerState<FacilityDetailScreen> {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    // 3. Use AppNetworkImage
                     AppNetworkImage(
                       imageUrl: widget.facility.photoUrl,
                       fallbackIcon: Icons.business,
                     ),
-                    // Gradient for text readability
                     const DecoratedBox(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
@@ -121,7 +130,6 @@ class _FacilityDetailScreenState extends ConsumerState<FacilityDetailScreen> {
                   ),
                   const SizedBox(height: 12),
 
-                  // 4. Search Bar
                   TextField(
                     controller: _searchController,
                     decoration: InputDecoration(
@@ -136,7 +144,6 @@ class _FacilityDetailScreenState extends ConsumerState<FacilityDetailScreen> {
                       contentPadding: const EdgeInsets.symmetric(vertical: 0),
                     ),
                     onChanged: (value) {
-                      // 5. Debounce the search input
                       _debouncer.run(() {
                         setState(() {
                           _searchQuery = value.toLowerCase();
@@ -151,7 +158,6 @@ class _FacilityDetailScreenState extends ConsumerState<FacilityDetailScreen> {
           ),
           spacesAsync.when(
             data: (spaces) {
-              // 6. Filter spaces based on query
               final filteredSpaces = spaces.where((space) {
                 return space.name.toLowerCase().contains(_searchQuery);
               }).toList();
