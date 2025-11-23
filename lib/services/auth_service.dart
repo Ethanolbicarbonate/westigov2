@@ -92,11 +92,10 @@ class AuthService {
   /// Update User Email
   Future<AppAuthResponse> updateEmail(String newEmail) async {
     try {
-      await _supabase.auth.updateUser(UserAttributes(email: newEmail));
-      // Update 'users' table email for consistency (optional, but good for display)
-      // Note: Ideally we wait for email confirmation webhook, but we can update display email now
-      // OR rely on Auth State Change. Supabase usually requires confirmation first.
-
+      await _supabase.auth.updateUser(
+        UserAttributes(email: newEmail),
+        emailRedirectTo: 'io.westigo://login-callback', // Add this line
+      );
       return AppAuthResponse(success: true);
     } on AuthException catch (e) {
       return AppAuthResponse(success: false, error: e.message);
@@ -114,7 +113,8 @@ class AuthService {
     } on AuthException catch (e) {
       return AppAuthResponse(success: false, error: e.message);
     } catch (e) {
-      return AppAuthResponse(success: false, error: 'An unexpected error occurred');
+      return AppAuthResponse(
+          success: false, error: 'An unexpected error occurred');
     }
   }
 }
