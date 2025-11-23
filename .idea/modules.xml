@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/westigov2.iml" filepath="$PROJECT_DIR$/westigov2.iml" />
-      <module fileurl="file://$PROJECT_DIR$/android/westigov2_android.iml" filepath="$PROJECT_DIR$/android/westigov2_android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/westigo.iml" filepath="$PROJECT_DIR$/westigo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/android/westigo_android.iml" filepath="$PROJECT_DIR$/android/westigo_android.iml" />
     </modules>
   </component>
 </project>

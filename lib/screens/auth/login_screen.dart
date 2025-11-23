@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:westigov2/providers/auth_provider.dart';
-import 'package:westigov2/screens/auth/reset_password_screen.dart';
-import 'package:westigov2/screens/auth/signup_screen.dart';
-import 'package:westigov2/screens/home_screen.dart';
-import 'package:westigov2/utils/constants.dart';
-import 'package:westigov2/utils/helpers.dart';
-import 'package:westigov2/utils/validators.dart';
+import 'package:westigo/providers/auth_provider.dart';
+import 'package:westigo/screens/auth/reset_password_screen.dart';
+import 'package:westigo/screens/auth/signup_screen.dart';
+import 'package:westigo/screens/home_screen.dart';
+import 'package:westigo/utils/constants.dart';
+import 'package:westigo/utils/helpers.dart';
+import 'package:westigo/utils/validators.dart';
 
 // Change to ConsumerStatefulWidget
 class LoginScreen extends ConsumerStatefulWidget {

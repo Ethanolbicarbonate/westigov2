@@ -1,7 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:westigov2/models/favorite.dart';
-import 'package:westigov2/models/space.dart';
-import 'package:westigov2/models/event.dart';
+import 'package:westigo/models/favorite.dart';
+import 'package:westigo/models/space.dart';
+import 'package:westigo/models/event.dart';
 
 class FavoriteService {
   final SupabaseClient _supabase;

@@ -2,15 +2,15 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:westigov2/providers/auth_provider.dart';
-import 'package:westigov2/providers/user_provider.dart';
-import 'package:westigov2/screens/auth/login_screen.dart';
-import 'package:westigov2/screens/profile/change_email_screen.dart';
-import 'package:westigov2/screens/profile/change_password_screen.dart';
-import 'package:westigov2/screens/profile/edit_profile_screen.dart';
-import 'package:westigov2/utils/constants.dart';
-import 'package:westigov2/utils/helpers.dart';
-import 'package:westigov2/screens/profile/account_info_screen.dart';
+import 'package:westigo/providers/auth_provider.dart';
+import 'package:westigo/providers/user_provider.dart';
+import 'package:westigo/screens/auth/login_screen.dart';
+import 'package:westigo/screens/profile/change_email_screen.dart';
+import 'package:westigo/screens/profile/change_password_screen.dart';
+import 'package:westigo/screens/profile/edit_profile_screen.dart';
+import 'package:westigo/utils/constants.dart';
+import 'package:westigo/utils/helpers.dart';
+import 'package:westigo/screens/profile/account_info_screen.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});

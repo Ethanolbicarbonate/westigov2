@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:westigov2/models/user_profile.dart';
-import 'package:westigov2/providers/auth_provider.dart';
-import 'package:westigov2/services/user_service.dart';
+import 'package:westigo/models/user_profile.dart';
+import 'package:westigo/providers/auth_provider.dart';
+import 'package:westigo/services/user_service.dart';
 
 final userServiceProvider = Provider<UserService>((ref) {
   final supabase = ref.watch(supabaseClientProvider);

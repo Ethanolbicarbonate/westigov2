@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:westigov2/models/space.dart';
-import 'package:westigov2/providers/favorite_provider.dart';
-import 'package:westigov2/utils/constants.dart';
+import 'package:westigo/models/space.dart';
+import 'package:westigo/providers/favorite_provider.dart';
+import 'package:westigo/utils/constants.dart';
 
 class FavoriteSpaceCard extends ConsumerWidget {
   final Space space;

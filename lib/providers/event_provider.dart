@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:westigov2/models/event.dart';
-import 'package:westigov2/providers/auth_provider.dart';
-import 'package:westigov2/services/event_service.dart';
-import 'package:westigov2/providers/event_filter_provider.dart';
+import 'package:westigo/models/event.dart';
+import 'package:westigo/providers/auth_provider.dart';
+import 'package:westigo/services/event_service.dart';
+import 'package:westigo/providers/event_filter_provider.dart';
 
 final eventServiceProvider = Provider<EventService>((ref) {
   final supabase = ref.watch(supabaseClientProvider);

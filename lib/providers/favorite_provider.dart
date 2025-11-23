@@ -1,9 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:westigov2/models/favorite.dart';
-import 'package:westigov2/providers/auth_provider.dart';
-import 'package:westigov2/services/favorite_service.dart';
-import 'package:westigov2/models/space.dart';
-import 'package:westigov2/models/event.dart';
+import 'package:westigo/models/favorite.dart';
+import 'package:westigo/providers/auth_provider.dart';
+import 'package:westigo/services/favorite_service.dart';
+import 'package:westigo/models/space.dart';
+import 'package:westigo/models/event.dart';
 
 // Service Provider
 final favoriteServiceProvider = Provider<FavoriteService>((ref) {

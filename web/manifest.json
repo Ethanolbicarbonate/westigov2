@@ -1,6 +1,6 @@
 {
-    "name": "westigov2",
-    "short_name": "westigov2",
+    "name": "westigo",
+    "short_name": "westigo",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

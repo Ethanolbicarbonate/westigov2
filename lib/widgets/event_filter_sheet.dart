@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:westigov2/providers/event_filter_provider.dart';
-import 'package:westigov2/utils/constants.dart';
+import 'package:westigo/providers/event_filter_provider.dart';
+import 'package:westigo/utils/constants.dart';
 
 class EventFilterSheet extends ConsumerWidget {
   const EventFilterSheet({super.key});

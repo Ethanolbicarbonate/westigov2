@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:string_similarity/string_similarity.dart';
-import 'package:westigov2/models/facility.dart';
-import 'package:westigov2/models/space.dart';
-import 'package:westigov2/providers/auth_provider.dart';
-import 'package:westigov2/providers/facility_provider.dart';
-import 'package:westigov2/services/space_service.dart';
+import 'package:westigo/models/facility.dart';
+import 'package:westigo/models/space.dart';
+import 'package:westigo/providers/auth_provider.dart';
+import 'package:westigo/providers/facility_provider.dart';
+import 'package:westigo/services/space_service.dart';
 
 // Provider for SpaceService
 final spaceServiceProvider = Provider<SpaceService>((ref) {

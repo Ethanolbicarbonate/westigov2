@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:westigov2/providers/home_provider.dart';
-import 'package:westigov2/screens/events/events_screen.dart';
-import 'package:westigov2/screens/favorites/favorites_screen.dart';
-import 'package:westigov2/screens/map/map_screen.dart';
-import 'package:westigov2/utils/constants.dart';
-import 'package:westigov2/screens/profile/profile_screen.dart';
+import 'package:westigo/providers/home_provider.dart';
+import 'package:westigo/screens/events/events_screen.dart';
+import 'package:westigo/screens/favorites/favorites_screen.dart';
+import 'package:westigo/screens/map/map_screen.dart';
+import 'package:westigo/utils/constants.dart';
+import 'package:westigo/screens/profile/profile_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});

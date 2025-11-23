@@ -1,5 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:westigov2/models/user_profile.dart';
+import 'package:westigo/models/user_profile.dart';
 import 'dart:io';
 
 class UserService {

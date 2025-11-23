@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:westigov2/providers/auth_provider.dart';
-import 'package:westigov2/utils/constants.dart';
-import 'package:westigov2/utils/helpers.dart';
-import 'package:westigov2/utils/validators.dart';
+import 'package:westigo/providers/auth_provider.dart';
+import 'package:westigo/utils/constants.dart';
+import 'package:westigo/utils/helpers.dart';
+import 'package:westigo/utils/validators.dart';
 
 class ResetPasswordScreen extends ConsumerStatefulWidget {
   const ResetPasswordScreen({super.key});

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:westigov2/models/facility.dart';
-import 'package:westigov2/utils/constants.dart';
+import 'package:westigo/models/facility.dart';
+import 'package:westigo/utils/constants.dart';
 
 class FacilityBottomSheet extends StatelessWidget {
   final Facility facility;

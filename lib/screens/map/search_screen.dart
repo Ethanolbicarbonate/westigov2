@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:westigov2/models/facility.dart';
-import 'package:westigov2/providers/search_provider.dart';
-import 'package:westigov2/screens/map/facility_detail_screen.dart';
-import 'package:westigov2/utils/constants.dart';
-import 'package:westigov2/models/space.dart'; // Import
-import 'package:westigov2/screens/map/space_detail_screen.dart'; // Import
+import 'package:westigo/models/facility.dart';
+import 'package:westigo/providers/search_provider.dart';
+import 'package:westigo/screens/map/facility_detail_screen.dart';
+import 'package:westigo/utils/constants.dart';
+import 'package:westigo/models/space.dart'; // Import
+import 'package:westigo/screens/map/space_detail_screen.dart'; // Import
 
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});

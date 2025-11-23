@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:westigov2/models/facility.dart';
-import 'package:westigov2/models/space.dart';
-import 'package:westigov2/providers/facility_provider.dart';
-import 'package:westigov2/screens/map/facility_detail_screen.dart';
-import 'package:westigov2/utils/constants.dart';
-import 'package:westigov2/widgets/favorite_button.dart';
+import 'package:westigo/models/facility.dart';
+import 'package:westigo/models/space.dart';
+import 'package:westigo/providers/facility_provider.dart';
+import 'package:westigo/screens/map/facility_detail_screen.dart';
+import 'package:westigo/utils/constants.dart';
+import 'package:westigo/widgets/favorite_button.dart';
 
 class SpaceDetailScreen extends ConsumerStatefulWidget {
   final Space space;

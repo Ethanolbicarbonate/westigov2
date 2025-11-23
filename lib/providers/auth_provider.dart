@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:westigov2/services/auth_service.dart';
+import 'package:westigo/services/auth_service.dart';
 
 // 1. Provider for the Supabase Client
 final supabaseClientProvider = Provider<SupabaseClient>((ref) {

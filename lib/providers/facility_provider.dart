@@ -1,9 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:westigov2/models/facility.dart';
-import 'package:westigov2/providers/auth_provider.dart';
-import 'package:westigov2/services/facility_service.dart';
-import 'package:westigov2/models/space.dart';
-import 'package:westigov2/providers/search_provider.dart'; // for spaceServiceProvider
+import 'package:westigo/models/facility.dart';
+import 'package:westigo/providers/auth_provider.dart';
+import 'package:westigo/services/facility_service.dart';
+import 'package:westigo/models/space.dart';
+import 'package:westigo/providers/search_provider.dart'; // for spaceServiceProvider
 
 // 1. Provider for the FacilityService
 final facilityServiceProvider = Provider<FacilityService>((ref) {

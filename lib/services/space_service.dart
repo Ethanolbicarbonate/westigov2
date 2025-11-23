@@ -1,5 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:westigov2/models/space.dart';
+import 'package:westigo/models/space.dart';
 
 class SpaceService {
   final SupabaseClient _supabase;

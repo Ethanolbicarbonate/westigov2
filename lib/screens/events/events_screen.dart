@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:westigov2/providers/event_provider.dart';
-import 'package:westigov2/utils/constants.dart';
-import 'package:westigov2/widgets/event_card.dart';
-import 'package:westigov2/screens/events/event_detail_screen.dart';
-import 'package:westigov2/widgets/event_filter_sheet.dart';
-import 'package:westigov2/providers/event_filter_provider.dart';
-import 'package:westigov2/widgets/event_card_skeleton.dart';
+import 'package:westigo/providers/event_provider.dart';
+import 'package:westigo/utils/constants.dart';
+import 'package:westigo/widgets/event_card.dart';
+import 'package:westigo/screens/events/event_detail_screen.dart';
+import 'package:westigo/widgets/event_filter_sheet.dart';
+import 'package:westigo/providers/event_filter_provider.dart';
+import 'package:westigo/widgets/event_card_skeleton.dart';
 
 class EventsScreen extends ConsumerStatefulWidget {
   const EventsScreen({super.key});

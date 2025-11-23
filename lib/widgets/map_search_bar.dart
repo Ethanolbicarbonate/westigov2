@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:westigov2/utils/constants.dart';
+import 'package:westigo/utils/constants.dart';
 
 class MapSearchBar extends StatelessWidget {
   final VoidCallback onTap;

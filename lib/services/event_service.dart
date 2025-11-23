@@ -1,5 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:westigov2/models/event.dart';
+import 'package:westigo/models/event.dart';
 
 class EventService {
   final SupabaseClient _supabase;

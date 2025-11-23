@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:westigov2/utils/constants.dart';
-import 'package:westigov2/providers/favorite_provider.dart';
-import 'package:westigov2/widgets/favorite_space_card.dart';
-import 'package:westigov2/screens/map/space_detail_screen.dart';
-import 'package:westigov2/widgets/favorite_event_card.dart';
-import 'package:westigov2/screens/events/event_detail_screen.dart'; // To navigate
-import 'package:westigov2/providers/home_provider.dart'; // Import
+import 'package:westigo/utils/constants.dart';
+import 'package:westigo/providers/favorite_provider.dart';
+import 'package:westigo/widgets/favorite_space_card.dart';
+import 'package:westigo/screens/map/space_detail_screen.dart';
+import 'package:westigo/widgets/favorite_event_card.dart';
+import 'package:westigo/screens/events/event_detail_screen.dart'; // To navigate
+import 'package:westigo/providers/home_provider.dart'; // Import
 
 class FavoritesScreen extends ConsumerStatefulWidget {
   const FavoritesScreen({super.key});

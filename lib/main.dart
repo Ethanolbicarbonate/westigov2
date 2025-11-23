@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:westigov2/config/supabase_config.dart';
-import 'package:westigov2/utils/constants.dart';
-import 'package:westigov2/screens/auth_gate.dart';
+import 'package:westigo/config/supabase_config.dart';
+import 'package:westigo/utils/constants.dart';
+import 'package:westigo/screens/auth_gate.dart';
+import 'package:westigo/config/theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,21 +22,7 @@ class WestigoApp extends StatelessWidget {
     return MaterialApp(
       title: 'Westigo',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: AppColors.primary,
-          primary: AppColors.primary,
-          secondary: AppColors.accent,
-          surface: AppColors.background,
-        ),
-        useMaterial3: true,
-        // Define default text styles if needed
-        scaffoldBackgroundColor: AppColors.background,
-        appBarTheme: const AppBarTheme(
-          elevation: 0,
-          centerTitle: true,
-        ),
-      ),
+      theme: AppTheme.lightTheme,
       home: const AuthGate(),
     );
   }

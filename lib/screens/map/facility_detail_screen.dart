@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:westigov2/models/facility.dart';
-import 'package:westigov2/providers/facility_provider.dart';
-import 'package:westigov2/utils/constants.dart';
-import 'package:westigov2/screens/map/space_detail_screen.dart';
-import 'package:westigov2/widgets/favorite_button.dart';
+import 'package:westigo/models/facility.dart';
+import 'package:westigo/providers/facility_provider.dart';
+import 'package:westigo/utils/constants.dart';
+import 'package:westigo/screens/map/space_detail_screen.dart';
+import 'package:westigo/widgets/favorite_button.dart';
 
 class FacilityDetailScreen extends ConsumerWidget {
   final Facility facility;

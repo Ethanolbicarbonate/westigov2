@@ -1,5 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:westigov2/models/facility.dart';
+import 'package:westigo/models/facility.dart';
 
 class FacilityService {
   final SupabaseClient _supabase;

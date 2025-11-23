@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:westigov2/models/event.dart';
-import 'package:westigov2/utils/constants.dart';
-import 'package:westigov2/utils/helpers.dart';
-import 'package:westigov2/widgets/favorite_button.dart';
+import 'package:westigo/models/event.dart';
+import 'package:westigo/utils/constants.dart';
+import 'package:westigo/utils/helpers.dart';
+import 'package:westigo/widgets/favorite_button.dart';
 
 class EventCard extends StatelessWidget {
   final Event event;

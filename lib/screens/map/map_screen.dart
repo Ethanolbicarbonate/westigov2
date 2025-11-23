@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart'; // Import Riverpod
 import 'package:latlong2/latlong.dart';
-import 'package:westigov2/providers/facility_provider.dart'; // Import Provider
-import 'package:westigov2/screens/map/facility_detail_screen.dart';
-import 'package:westigov2/utils/constants.dart';
-import 'package:westigov2/widgets/facility_marker.dart';
-import 'package:westigov2/widgets/facility_bottom_sheet.dart';
-import 'package:westigov2/widgets/map_search_bar.dart';
-import 'package:westigov2/providers/search_provider.dart';
-import 'package:westigov2/screens/map/search_screen.dart';
+import 'package:westigo/providers/facility_provider.dart'; // Import Provider
+import 'package:westigo/screens/map/facility_detail_screen.dart';
+import 'package:westigo/utils/constants.dart';
+import 'package:westigo/widgets/facility_marker.dart';
+import 'package:westigo/widgets/facility_bottom_sheet.dart';
+import 'package:westigo/widgets/map_search_bar.dart';
+import 'package:westigo/providers/search_provider.dart';
+import 'package:westigo/screens/map/search_screen.dart';
 
 // Change to ConsumerStatefulWidget
 class MapScreen extends ConsumerStatefulWidget {

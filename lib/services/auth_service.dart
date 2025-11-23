@@ -1,5 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:westigov2/models/app_auth_response.dart';
+import 'package:westigo/models/app_auth_response.dart';
 
 class AuthService {
   final SupabaseClient _supabase;
