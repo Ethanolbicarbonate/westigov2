@@ -7,6 +7,8 @@ import 'package:westigo/screens/home_screen.dart';
 import 'package:westigo/utils/constants.dart';
 import 'package:westigo/utils/helpers.dart';
 import 'package:westigo/utils/validators.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+
 
 // Change to ConsumerStatefulWidget
 class LoginScreen extends ConsumerStatefulWidget {
@@ -46,7 +48,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
       // 4. Handle Result
       if (!mounted) return;
-      
+
       if (response.success) {
         // Success -> Navigate to Home
         Navigator.of(context).pushReplacement(
@@ -54,13 +56,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         );
       } else {
         // Error -> Show Snackbar
-        AppHelpers.showErrorSnackbar(
-          context, 
-          response.error ?? 'Login failed'
-        );
+        AppHelpers.showErrorSnackbar(context, response.error ?? 'Login failed');
       }
     } catch (e) {
-      if (mounted) AppHelpers.showErrorSnackbar(context, 'An unexpected error occurred');
+      if (mounted)
+        AppHelpers.showErrorSnackbar(context, 'An unexpected error occurred');
     } finally {
       // 5. Reset Loading State
       if (mounted) ref.read(authLoadingProvider.notifier).state = false;
@@ -84,10 +84,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Icon(Icons.school_rounded, size: 80, color: AppColors.primary),
+                  SvgPicture.asset(
+                    'assets/images/emblemsvg.svg',
+                    width: 80,
+                    height: 80,
+                    colorFilter: const ColorFilter.mode(
+                      AppColors.primary,
+                      BlendMode.srcIn,
+                    ),
+                  ),
                   const SizedBox(height: 16),
                   Text(
-                    'Welcome Back',
+                    'Hello, Taga West',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.bold,
@@ -96,7 +104,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Log in to continue navigating WVSU',
+                    'Log in to Westigo and continue navigating WVSU',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: AppColors.textLight,
@@ -114,7 +122,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       labelText: 'Email Address',
                       prefixIcon: Icon(Icons.email_outlined),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(AppSizes.radiusM)),
+                        borderRadius:
+                            BorderRadius.all(Radius.circular(AppSizes.radiusM)),
                       ),
                     ),
                     validator: Validators.validateEmail,
@@ -130,7 +139,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       labelText: 'Password',
                       prefixIcon: const Icon(Icons.lock_outline),
                       suffixIcon: IconButton(
-                        icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
+                        icon: Icon(_obscurePassword
+                            ? Icons.visibility_off
+                            : Icons.visibility),
                         onPressed: () {
                           setState(() {
                             _obscurePassword = !_obscurePassword;
@@ -138,20 +149,26 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         },
                       ),
                       border: const OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(AppSizes.radiusM)),
+                        borderRadius:
+                            BorderRadius.all(Radius.circular(AppSizes.radiusM)),
                       ),
                     ),
-                    validator: (val) => Validators.validateRequired(val, 'Password'),
+                    validator: (val) =>
+                        Validators.validateRequired(val, 'Password'),
                   ),
 
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
-                      onPressed: isLoading ? null : () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(builder: (context) => const ResetPasswordScreen()),
-                        );
-                      },
+                      onPressed: isLoading
+                          ? null
+                          : () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const ResetPasswordScreen()),
+                              );
+                            },
                       child: const Text('Forgot Password?'),
                     ),
                   ),
@@ -169,29 +186,35 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                       elevation: 0,
                     ),
-                    child: isLoading 
-                      ? const SizedBox(
-                          height: 20, 
-                          width: 20, 
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
-                        )
-                      : const Text(
-                          'Log In',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
+                    child: isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                                color: Colors.white, strokeWidth: 2))
+                        : const Text(
+                            'Log In',
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
                   ),
                   const SizedBox(height: 24),
 
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text("Don't have an account? ", style: TextStyle(color: AppColors.textLight)),
+                      const Text("Don't have an account? ",
+                          style: TextStyle(color: AppColors.textLight)),
                       GestureDetector(
-                        onTap: isLoading ? null : () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(builder: (context) => const SignupScreen()),
-                          );
-                        },
+                        onTap: isLoading
+                            ? null
+                            : () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const SignupScreen()),
+                                );
+                              },
                         child: const Text(
                           'Sign Up',
                           style: TextStyle(
