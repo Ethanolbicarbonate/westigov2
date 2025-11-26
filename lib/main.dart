@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:westigo/config/supabase_config.dart';
 import 'package:westigo/utils/constants.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:westigo/screens/auth_gate.dart';
 import 'package:westigo/config/theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
   
   // Initialize Supabase
   await SupabaseConfig.initialize();
