@@ -1,5 +1,3 @@
-Here is the README for the Westigo mobile application repository, adapted to the requested structure.
-
 [![Westigo Logo](assets/images/logo.svg)](https://github.com/ethanolbicarbonate/westigov2)
 
 The official mobile companion for West Visayas State University (WVSU) students.
