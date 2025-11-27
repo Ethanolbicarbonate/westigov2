@@ -1,6 +1,6 @@
 [![Westigo Logo](assets/images/logo.svg)](https://github.com/ethanolbicarbonate/westigov2)
 
-The official mobile companion for West Visayas State University (WVSU) students.
+A mobile companion for West Visayas State University (WVSU) students.
 Navigate the campus, discover events, and locate facilities seamlessly.
 
 [Key Features](https://www.google.com/search?q=%23-key-features) • [Tech Stack](https://www.google.com/search?q=%23-tech-stack) • [Getting Started](https://www.google.com/search?q=%23-getting-started) • [Configuration](https://www.google.com/search?q=%23configuration)
